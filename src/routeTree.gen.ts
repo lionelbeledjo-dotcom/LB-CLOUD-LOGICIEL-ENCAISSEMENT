@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuperadminLoginRouteImport } from './routes/superadmin.login'
 import { Route as AuthenticatedVentesRouteImport } from './routes/_authenticated/ventes'
 import { Route as AuthenticatedSuperAdminRouteImport } from './routes/_authenticated/super-admin'
 import { Route as AuthenticatedStocksRouteImport } from './routes/_authenticated/stocks'
@@ -54,6 +55,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperadminLoginRoute = SuperadminLoginRouteImport.update({
+  id: '/superadmin/login',
+  path: '/superadmin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedVentesRoute = AuthenticatedVentesRouteImport.update({
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/stocks': typeof AuthenticatedStocksRoute
   '/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
   '/ventes': typeof AuthenticatedVentesRoute
+  '/superadmin/login': typeof SuperadminLoginRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
   '/ventes': typeof AuthenticatedVentesRoute
+  '/superadmin/login': typeof SuperadminLoginRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/_authenticated/stocks': typeof AuthenticatedStocksRoute
   '/_authenticated/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
   '/_authenticated/ventes': typeof AuthenticatedVentesRoute
+  '/superadmin/login': typeof SuperadminLoginRoute
   '/_authenticated/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/_authenticated/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/_authenticated/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/stocks'
     | '/super-admin'
     | '/ventes'
+    | '/superadmin/login'
     | '/produits/$productId'
     | '/super-admin/abonnements'
     | '/super-admin/admins'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
     | '/produits'
     | '/stocks'
     | '/ventes'
+    | '/superadmin/login'
     | '/produits/$productId'
     | '/super-admin/abonnements'
     | '/super-admin/admins'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/_authenticated/stocks'
     | '/_authenticated/super-admin'
     | '/_authenticated/ventes'
+    | '/superadmin/login'
     | '/_authenticated/produits/$productId'
     | '/_authenticated/super-admin/abonnements'
     | '/_authenticated/super-admin/admins'
@@ -298,6 +310,7 @@ export interface RootRouteChildren {
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
+  SuperadminLoginRoute: typeof SuperadminLoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -335,6 +348,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/superadmin/login': {
+      id: '/superadmin/login'
+      path: '/superadmin/login'
+      fullPath: '/superadmin/login'
+      preLoaderRoute: typeof SuperadminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/ventes': {
@@ -534,6 +554,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfidentialiteRoute: ConfidentialiteRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
+  SuperadminLoginRoute: SuperadminLoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
