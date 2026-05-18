@@ -413,15 +413,58 @@ function RgpdTab({ companyId }: { companyId: string }) {
     },
   });
 
-  const doExport = async (id: string, name: string) => {
+  const doExport = async (id: string, name: string, format: "json" | "csv") => {
     try {
       const res = await exportFn({ data: { customerId: id } });
-      const blob = new Blob([JSON.stringify(res, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = `rgpd_${name.replace(/\W+/g, "_")}.json`; a.click();
-      URL.revokeObjectURL(url);
-      toast.success("Export RGPD téléchargé — action consignée à l'audit");
+      const slug = name.replace(/\W+/g, "_");
+      if (format === "json") {
+        const blob = new Blob([JSON.stringify(res, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `rgpd_${slug}.json`; a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        // Multi-section CSV: client info + sales + items
+        const c = res.customer as Record<string, any> | null;
+        const sales = (res.sales ?? []) as Array<Record<string, any>>;
+        const sections: string[] = [];
+
+        sections.push("# CLIENT");
+        if (c) {
+          const keys = Object.keys(c);
+          sections.push(keys.join(";"));
+          sections.push(keys.map(k => csvEsc(c[k])).join(";"));
+        }
+
+        sections.push("");
+        sections.push("# VENTES");
+        if (sales.length) {
+          const saleKeys = Object.keys(sales[0]).filter(k => k !== "sale_items");
+          sections.push(saleKeys.join(";"));
+          for (const s of sales) sections.push(saleKeys.map(k => csvEsc(s[k])).join(";"));
+        }
+
+        sections.push("");
+        sections.push("# LIGNES DE VENTE");
+        const items = sales.flatMap(s =>
+          (s.sale_items ?? []).map((it: Record<string, any>) => ({ sale_id: s.id, invoice_number: s.invoice_number, ...it }))
+        );
+        if (items.length) {
+          const itemKeys = Object.keys(items[0]);
+          sections.push(itemKeys.join(";"));
+          for (const it of items) sections.push(itemKeys.map(k => csvEsc(it[k])).join(";"));
+        }
+
+        sections.push("");
+        sections.push(`# Export généré le ${new Date().toISOString()}`);
+
+        const blob = new Blob(["\uFEFF" + sections.join("\n")], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `rgpd_${slug}.csv`; a.click();
+        URL.revokeObjectURL(url);
+      }
+      toast.success(`Export RGPD ${format.toUpperCase()} téléchargé — action consignée à l'audit`);
       qc.invalidateQueries({ queryKey: ["audit", companyId] });
     } catch (e: any) { toast.error(e.message); }
   };
