@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
 import { Route as AuthenticatedSuperAdminIndexRouteImport } from './routes/_authenticated/super-admin.index'
+import { Route as AuthenticatedSuperAdminMfaRouteImport } from './routes/_authenticated/super-admin.mfa'
 import { Route as AuthenticatedSuperAdminLogsRouteImport } from './routes/_authenticated/super-admin.logs'
 import { Route as AuthenticatedSuperAdminEntreprisesRouteImport } from './routes/_authenticated/super-admin.entreprises'
 import { Route as AuthenticatedSuperAdminAbonnementsRouteImport } from './routes/_authenticated/super-admin.abonnements'
@@ -86,6 +87,12 @@ const AuthenticatedSuperAdminIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedSuperAdminRoute,
   } as any)
+const AuthenticatedSuperAdminMfaRoute =
+  AuthenticatedSuperAdminMfaRouteImport.update({
+    id: '/mfa',
+    path: '/mfa',
+    getParentRoute: () => AuthenticatedSuperAdminRoute,
+  } as any)
 const AuthenticatedSuperAdminLogsRoute =
   AuthenticatedSuperAdminLogsRouteImport.update({
     id: '/logs',
@@ -126,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
   '/super-admin/logs': typeof AuthenticatedSuperAdminLogsRoute
+  '/super-admin/mfa': typeof AuthenticatedSuperAdminMfaRoute
   '/super-admin/': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -142,6 +150,7 @@ export interface FileRoutesByTo {
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
   '/super-admin/logs': typeof AuthenticatedSuperAdminLogsRoute
+  '/super-admin/mfa': typeof AuthenticatedSuperAdminMfaRoute
   '/super-admin': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -161,6 +170,7 @@ export interface FileRoutesById {
   '/_authenticated/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/_authenticated/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
   '/_authenticated/super-admin/logs': typeof AuthenticatedSuperAdminLogsRoute
+  '/_authenticated/super-admin/mfa': typeof AuthenticatedSuperAdminMfaRoute
   '/_authenticated/super-admin/': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/super-admin/abonnements'
     | '/super-admin/entreprises'
     | '/super-admin/logs'
+    | '/super-admin/mfa'
     | '/super-admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/super-admin/abonnements'
     | '/super-admin/entreprises'
     | '/super-admin/logs'
+    | '/super-admin/mfa'
     | '/super-admin'
   id:
     | '__root__'
@@ -214,6 +226,7 @@ export interface FileRouteTypes {
     | '/_authenticated/super-admin/abonnements'
     | '/_authenticated/super-admin/entreprises'
     | '/_authenticated/super-admin/logs'
+    | '/_authenticated/super-admin/mfa'
     | '/_authenticated/super-admin/'
   fileRoutesById: FileRoutesById
 }
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSuperAdminIndexRouteImport
       parentRoute: typeof AuthenticatedSuperAdminRoute
     }
+    '/_authenticated/super-admin/mfa': {
+      id: '/_authenticated/super-admin/mfa'
+      path: '/mfa'
+      fullPath: '/super-admin/mfa'
+      preLoaderRoute: typeof AuthenticatedSuperAdminMfaRouteImport
+      parentRoute: typeof AuthenticatedSuperAdminRoute
+    }
     '/_authenticated/super-admin/logs': {
       id: '/_authenticated/super-admin/logs'
       path: '/logs'
@@ -359,6 +379,7 @@ interface AuthenticatedSuperAdminRouteChildren {
   AuthenticatedSuperAdminAbonnementsRoute: typeof AuthenticatedSuperAdminAbonnementsRoute
   AuthenticatedSuperAdminEntreprisesRoute: typeof AuthenticatedSuperAdminEntreprisesRoute
   AuthenticatedSuperAdminLogsRoute: typeof AuthenticatedSuperAdminLogsRoute
+  AuthenticatedSuperAdminMfaRoute: typeof AuthenticatedSuperAdminMfaRoute
   AuthenticatedSuperAdminIndexRoute: typeof AuthenticatedSuperAdminIndexRoute
 }
 
@@ -369,6 +390,7 @@ const AuthenticatedSuperAdminRouteChildren: AuthenticatedSuperAdminRouteChildren
     AuthenticatedSuperAdminEntreprisesRoute:
       AuthenticatedSuperAdminEntreprisesRoute,
     AuthenticatedSuperAdminLogsRoute: AuthenticatedSuperAdminLogsRoute,
+    AuthenticatedSuperAdminMfaRoute: AuthenticatedSuperAdminMfaRoute,
     AuthenticatedSuperAdminIndexRoute: AuthenticatedSuperAdminIndexRoute,
   }
 

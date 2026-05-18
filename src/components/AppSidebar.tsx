@@ -9,9 +9,12 @@ import {
   Calculator,
   Settings,
   ShieldCheck,
+  Shield,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { LbLogo } from "./LbLogo";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const navMain = [
   { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
