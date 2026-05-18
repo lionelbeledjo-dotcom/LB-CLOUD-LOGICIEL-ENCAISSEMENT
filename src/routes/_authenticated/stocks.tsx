@@ -552,6 +552,8 @@ type EntryLine = {
   product_id: string;
   quantity: string;
   unit_cost: string;
+  lot_number: string;
+  expiry_date: string;
 };
 
 function MultiEntryTab({ companyId }: { companyId: string }) {
