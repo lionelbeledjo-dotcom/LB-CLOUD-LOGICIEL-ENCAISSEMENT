@@ -128,6 +128,12 @@ export const exportCustomerData = createServerFn({ method: "POST" })
       .select("*, sale_items(*)")
       .eq("customer_id", data.customerId);
 
+    // Trace RGPD action
+    await supabase.rpc("log_rgpd_action", {
+      _customer_id: data.customerId,
+      _action: "RGPD_EXPORT",
+    });
+
     return {
       exported_at: new Date().toISOString(),
       customer,

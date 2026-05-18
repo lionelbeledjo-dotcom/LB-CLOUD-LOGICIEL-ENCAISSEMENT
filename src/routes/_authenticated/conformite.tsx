@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, FileDown, ShieldCheck, UserX, ScrollText, Archive } from "lucide-react";
+import { Download, FileDown, ShieldCheck, UserX, ScrollText, Archive, AlertTriangle, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveCompany } from "@/hooks/use-company";
@@ -14,6 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   exportFEC, monthlyVatReport, exportCustomerData, anonymizeCustomer,
 } from "@/lib/conformite.functions";
@@ -277,20 +281,42 @@ function ArchivesTab({ companyId }: { companyId: string }) {
 
 // -------- Audit tab --------
 function AuditTab({ companyId }: { companyId: string }) {
+  const [filter, setFilter] = useState<string>("all");
   const { data, isLoading } = useQuery({
     queryKey: ["audit", companyId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("audit_logs").select("*").eq("company_id", companyId)
-        .order("created_at", { ascending: false }).limit(200);
+        .order("created_at", { ascending: false }).limit(500);
       if (error) throw error;
       return data;
     },
   });
 
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    if (filter === "all") return data;
+    if (filter === "rgpd") return data.filter(l => l.action?.startsWith("RGPD_"));
+    return data.filter(l => l.action === filter);
+  }, [data, filter]);
+
   return (
     <div className="mt-6">
       <Card title="Historique des modifications">
+        <div className="flex items-center gap-3 mb-4">
+          <Filter className="size-4 text-muted-foreground" />
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Toutes les actions</SelectItem>
+              <SelectItem value="rgpd">RGPD uniquement</SelectItem>
+              <SelectItem value="INSERT">Créations</SelectItem>
+              <SelectItem value="UPDATE">Modifications</SelectItem>
+              <SelectItem value="DELETE">Suppressions</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-muted-foreground">{filtered.length} entrée(s)</span>
+        </div>
         {isLoading ? <Skeleton className="h-32" /> : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -298,15 +324,25 @@ function AuditTab({ companyId }: { companyId: string }) {
                 <tr><Th>Date</Th><Th>Action</Th><Th>Table</Th><Th>Cible</Th><Th>Utilisateur</Th></tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {data?.map(l => (
-                  <tr key={l.id}>
-                    <Td>{new Date(l.created_at).toLocaleString("fr-FR")}</Td>
-                    <Td><span className="px-2 py-0.5 rounded bg-surface-elevated">{l.action}</span></Td>
-                    <Td>{l.target_table ?? "—"}</Td>
-                    <Td className="font-mono text-[10px]">{l.target_id?.slice(0, 8) ?? "—"}</Td>
-                    <Td className="font-mono text-[10px]">{l.user_id?.slice(0, 8) ?? "—"}</Td>
-                  </tr>
-                ))}
+                {filtered.map(l => {
+                  const isRgpd = l.action?.startsWith("RGPD_");
+                  return (
+                    <tr key={l.id} className={isRgpd ? "bg-primary/5" : ""}>
+                      <Td>{new Date(l.created_at).toLocaleString("fr-FR")}</Td>
+                      <Td>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                          isRgpd ? "bg-primary/15 text-primary" : "bg-surface-elevated"
+                        }`}>{l.action}</span>
+                      </Td>
+                      <Td>{l.target_table ?? "—"}</Td>
+                      <Td className="font-mono text-[10px]">{l.target_id?.slice(0, 8) ?? "—"}</Td>
+                      <Td className="font-mono text-[10px]">{l.user_id?.slice(0, 8) ?? "—"}</Td>
+                    </tr>
+                  );
+                })}
+                {!filtered.length && (
+                  <tr><Td className="text-muted-foreground">Aucune entrée.</Td><Td>—</Td><Td>—</Td><Td>—</Td><Td>—</Td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -319,6 +355,9 @@ function AuditTab({ companyId }: { companyId: string }) {
 // -------- RGPD tab --------
 function RgpdTab({ companyId }: { companyId: string }) {
   const [search, setSearch] = useState("");
+  const [toAnon, setToAnon] = useState<{ id: string; name: string } | null>(null);
+  const [pending, setPending] = useState(false);
+  const qc = useQueryClient();
   const exportFn = useServerFn(exportCustomerData);
   const anonFn = useServerFn(anonymizeCustomer);
 
@@ -326,7 +365,7 @@ function RgpdTab({ companyId }: { companyId: string }) {
     queryKey: ["rgpd-customers", companyId, search],
     queryFn: async () => {
       let q = supabase.from("customers").select("id, full_name, email, phone, is_active")
-        .eq("company_id", companyId).limit(50);
+        .eq("company_id", companyId).order("full_name").limit(50);
       if (search) q = q.ilike("full_name", `%${search}%`);
       const { data, error } = await q;
       if (error) throw error;
@@ -342,17 +381,25 @@ function RgpdTab({ companyId }: { companyId: string }) {
       const a = document.createElement("a");
       a.href = url; a.download = `rgpd_${name.replace(/\W+/g, "_")}.json`; a.click();
       URL.revokeObjectURL(url);
-      toast.success("Export RGPD téléchargé");
+      toast.success("Export RGPD téléchargé — action consignée à l'audit");
+      qc.invalidateQueries({ queryKey: ["audit", companyId] });
     } catch (e: any) { toast.error(e.message); }
   };
 
-  const doAnon = async (id: string) => {
-    if (!confirm("Anonymiser ce client ? Les données identifiantes seront effacées (les factures sont conservées 10 ans).")) return;
+  const confirmAnon = async () => {
+    if (!toAnon) return;
+    setPending(true);
     try {
-      await anonFn({ data: { customerId: id } });
-      toast.success("Client anonymisé");
+      await anonFn({ data: { customerId: toAnon.id } });
+      toast.success(`${toAnon.name} anonymisé — action consignée à l'audit`);
+      setToAnon(null);
       customers.refetch();
-    } catch (e: any) { toast.error(e.message); }
+      qc.invalidateQueries({ queryKey: ["audit", companyId] });
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
@@ -360,7 +407,8 @@ function RgpdTab({ companyId }: { companyId: string }) {
       <Card title="Droits RGPD — Article 17 & 20">
         <p className="text-xs text-muted-foreground mb-4 flex items-center gap-2">
           <ShieldCheck className="size-3" />
-          Export portable (JSON) ou anonymisation (les données comptables liées sont conservées pour respecter la NF525).
+          Export portable (JSON) ou anonymisation. Chaque action est journalisée dans l'onglet Audit.
+          Les données comptables liées sont conservées pour respecter la NF525.
         </p>
         <Input
           placeholder="Rechercher un client…"
@@ -372,14 +420,21 @@ function RgpdTab({ companyId }: { companyId: string }) {
             {customers.data?.map(c => (
               <div key={c.id} className="flex items-center justify-between rounded border border-border p-3">
                 <div>
-                  <p className="text-sm font-medium text-foreground">{c.full_name}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {c.full_name}
+                    {!c.is_active && <span className="ml-2 text-[10px] px-2 py-0.5 rounded bg-muted text-muted-foreground">anonymisé</span>}
+                  </p>
                   <p className="text-xs text-muted-foreground">{c.email ?? "—"} · {c.phone ?? "—"}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => doExport(c.id, c.full_name)}>
                     <Download className="size-3 mr-1" /> Exporter
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => doAnon(c.id)} disabled={!c.is_active}>
+                  <Button
+                    size="sm" variant="destructive"
+                    onClick={() => setToAnon({ id: c.id, name: c.full_name })}
+                    disabled={!c.is_active}
+                  >
                     <UserX className="size-3 mr-1" /> Anonymiser
                   </Button>
                 </div>
@@ -389,6 +444,42 @@ function RgpdTab({ companyId }: { companyId: string }) {
           </div>
         )}
       </Card>
+
+      <AlertDialog open={!!toAnon} onOpenChange={(o) => !o && !pending && setToAnon(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="size-5 text-destructive" />
+              Anonymiser définitivement ce client ?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <p>
+                  Le client <strong className="text-foreground">{toAnon?.name}</strong> sera anonymisé
+                  conformément à l'article 17 du RGPD :
+                </p>
+                <ul className="list-disc list-inside text-muted-foreground text-xs space-y-1">
+                  <li>Nom, email, téléphone et adresse effacés</li>
+                  <li>Compte désactivé</li>
+                  <li>Factures conservées 10 ans (obligation légale NF525)</li>
+                  <li>Action tracée dans l'historique d'audit</li>
+                </ul>
+                <p className="text-destructive font-medium pt-2">Cette action est irréversible.</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pending}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmAnon(); }}
+              disabled={pending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {pending ? "Anonymisation…" : "Confirmer l'anonymisation"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
