@@ -103,6 +103,7 @@ function SessionBar({ companyId }: { companyId: string }) {
   const [opening, setOpening] = useState("0");
   const [closing, setClosing] = useState("");
   const [notes, setNotes] = useState("");
+  const [ackVariance, setAckVariance] = useState(false);
 
   const { data: session } = useQuery({
     queryKey: ["cash-session", companyId],
@@ -158,8 +159,15 @@ function SessionBar({ companyId }: { companyId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Caisse clôturée");
-      setCloseSessionDlg(false); setClosing(""); setNotes("");
+      const v = (parseFloat(closing) || 0) - expected;
+      if (Math.abs(v) < 0.01) {
+        toast.success("Caisse clôturée — écart nul");
+      } else if (v < 0) {
+        toast.warning(`Caisse clôturée avec un manquant de ${eur(Math.abs(v))}`);
+      } else {
+        toast.warning(`Caisse clôturée avec un excédent de ${eur(v)}`);
+      }
+      setCloseSessionDlg(false); setClosing(""); setNotes(""); setAckVariance(false);
       qc.invalidateQueries({ queryKey: ["cash-session", companyId] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -215,36 +223,98 @@ function SessionBar({ companyId }: { companyId: string }) {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={closeSessionDlg} onOpenChange={setCloseSessionDlg}>
+      <Dialog open={closeSessionDlg} onOpenChange={(o) => { setCloseSessionDlg(o); if (!o) setAckVariance(false); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Clôture de caisse</DialogTitle>
             <DialogDescription>
-              Attendu en caisse: <strong className="text-foreground">{eur(expected)}</strong>
+              Théorique (fonds + ventes espèces): <strong className="text-foreground">{eur(expected)}</strong>
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Espèces comptées (€)</Label>
-              <Input type="number" step="0.01" min="0" value={closing} onChange={(e) => setClosing(e.target.value)} />
-              {closing && (
-                <p className="text-xs mt-1 text-muted-foreground">
-                  Écart: <span className={`tabular-nums font-semibold ${
-                    parseFloat(closing) - expected === 0 ? "text-emerald-400"
-                    : "text-amber-400"
-                  }`}>{eur((parseFloat(closing) || 0) - expected)}</span>
-                </p>
-              )}
-            </div>
-            <div>
-              <Label>Notes</Label>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setCloseSessionDlg(false)}>Annuler</Button>
-            <Button onClick={() => closeMut.mutate()} disabled={closeMut.isPending}>Clôturer</Button>
-          </DialogFooter>
+          {(() => {
+            const counted = parseFloat(closing);
+            const hasInput = closing !== "" && !Number.isNaN(counted);
+            const variance = hasInput ? counted - expected : 0;
+            const absV = Math.abs(variance);
+            const tolerance = 0.01;
+            const significant = absV >= 2; // seuil d'alerte fort
+            const mismatch = hasInput && absV >= tolerance;
+            const needsAck = mismatch && significant;
+            const canClose = !hasInput ? false : (!needsAck || ackVariance);
+            return (
+              <div className="space-y-3">
+                <div>
+                  <Label>Espèces comptées (€)</Label>
+                  <Input type="number" step="0.01" min="0" value={closing} onChange={(e) => setClosing(e.target.value)} />
+                </div>
+                {hasInput && (
+                  <div className={`rounded-lg ring-1 px-3 py-2 text-sm flex items-start gap-2 ${
+                    !mismatch ? "ring-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+                    : significant ? "ring-red-500/40 bg-red-500/10 text-red-300"
+                    : "ring-amber-500/40 bg-amber-500/10 text-amber-300"
+                  }`}>
+                    <AlertTriangle className="size-4 mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      {!mismatch ? (
+                        <p>Aucun écart — la caisse correspond au théorique.</p>
+                      ) : (
+                        <>
+                          <p className="font-medium">
+                            {variance < 0 ? "Manquant" : "Excédent"} de{" "}
+                            <span className="tabular-nums">{eur(absV)}</span>{" "}
+                            <span className="opacity-70">
+                              ({eur(counted)} comptés vs {eur(expected)} attendus)
+                            </span>
+                          </p>
+                          <p className="opacity-80 mt-0.5">
+                            {significant
+                              ? "Écart significatif — vérifiez le tiroir et justifiez dans les notes avant de valider."
+                              : "Écart mineur — vous pouvez clôturer."}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <Label>Notes {needsAck && <span className="text-red-400">*</span>}</Label>
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={2}
+                    placeholder={needsAck ? "Justification de l'écart obligatoire…" : "Optionnel"}
+                  />
+                </div>
+                {needsAck && (
+                  <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={ackVariance}
+                      onChange={(e) => setAckVariance(e.target.checked)}
+                      className="size-4 accent-primary"
+                    />
+                    Je confirme l'écart de <span className="tabular-nums font-semibold text-foreground">{eur(absV)}</span> et l'enregistre dans le journal.
+                  </label>
+                )}
+                <DialogFooter>
+                  <Button variant="ghost" onClick={() => setCloseSessionDlg(false)}>Annuler</Button>
+                  <Button
+                    onClick={() => {
+                      if (needsAck && !notes.trim()) {
+                        toast.error("Merci de justifier l'écart dans les notes.");
+                        return;
+                      }
+                      closeMut.mutate();
+                    }}
+                    disabled={!canClose || closeMut.isPending}
+                    variant={needsAck ? "destructive" : "default"}
+                  >
+                    {needsAck ? "Clôturer malgré l'écart" : "Clôturer"}
+                  </Button>
+                </DialogFooter>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
