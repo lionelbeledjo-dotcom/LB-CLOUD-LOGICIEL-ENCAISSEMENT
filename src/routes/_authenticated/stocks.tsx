@@ -371,11 +371,20 @@ function MovementTab({
 
   const selected = products?.find((p) => p.id === productId);
 
+  const lotDlcError = lotNumber.trim() && !expiryDate;
+  const expiryInvalid = expiryDate ? isNaN(new Date(expiryDate).getTime()) : false;
+
   const mut = useMutation({
     mutationFn: async () => {
       if (!productId) throw new Error("Sélectionnez un produit");
       const qty = parseFloat(quantity);
       if (!qty || qty <= 0) throw new Error("Quantité invalide");
+      if (lotNumber.trim() && !expiryDate) {
+        throw new Error("La date d'expiration (DLC) est obligatoire lorsqu'un numéro de lot est renseigné.");
+      }
+      if (expiryDate && isNaN(new Date(expiryDate).getTime())) {
+        throw new Error("La date d'expiration (DLC) n'est pas une date valide.");
+      }
       const { error } = await (supabase.rpc as any)("record_stock_movement", {
         _product_id: productId,
         _movement_type: kind,
