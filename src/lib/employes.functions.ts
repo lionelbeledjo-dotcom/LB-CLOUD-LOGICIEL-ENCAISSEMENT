@@ -169,3 +169,44 @@ export const setEmployeActive = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+function generateTempPassword() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  let out = "";
+  const buf = new Uint8Array(14);
+  crypto.getRandomValues(buf);
+  for (const b of buf) out += chars[b % chars.length];
+  return `Lb!${out}`;
+}
+
+export const resetEmployePassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { companyId: string; targetUserId: string; password?: string }) =>
+    z.object({
+      companyId: z.string().uuid(),
+      targetUserId: z.string().uuid(),
+      password: z.string().min(8).max(72).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, data.companyId, userId);
+
+    // Ensure target belongs to the same company
+    const { data: member, error: memberErr } = await supabase
+      .from("company_members")
+      .select("id")
+      .eq("company_id", data.companyId)
+      .eq("user_id", data.targetUserId)
+      .maybeSingle();
+    if (memberErr) throw new Error(memberErr.message);
+    if (!member) throw new Error("Cet utilisateur n'appartient pas à l'entreprise.");
+
+    const newPassword = data.password?.trim() || generateTempPassword();
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.targetUserId, {
+      password: newPassword,
+    });
+    if (error) throw new Error(error.message);
+
+    return { ok: true, password: newPassword, generated: !data.password };
+  });
