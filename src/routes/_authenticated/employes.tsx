@@ -310,6 +310,18 @@ function EmployesPage() {
               <div className="text-right flex items-center justify-end gap-1">
                 <Button
                   variant="ghost" size="sm"
+                  onClick={() => setEditTarget({
+                    userId: m.user_id,
+                    fullName: m.full_name ?? "",
+                    phone: m.phone ?? "",
+                    avatarUrl: m.avatar_url ?? null,
+                  })}
+                  title="Modifier le profil"
+                >
+                  <Pencil className="size-4" />
+                </Button>
+                <Button
+                  variant="ghost" size="sm"
                   onClick={() => setResetTarget({ userId: m.user_id, name: m.full_name ?? m.email ?? "cet utilisateur" })}
                   title="Réinitialiser le mot de passe"
                 >
