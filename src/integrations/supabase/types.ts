@@ -716,6 +716,7 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          invoice_number: string | null
           movement_type: string
           product_id: string
           product_name: string
@@ -724,6 +725,8 @@ export type Database = {
           quantity_before: number
           reason: string | null
           reference: string | null
+          supplier_id: string | null
+          supplier_name: string | null
           total_value: number
           unit_cost: number
           user_id: string | null
@@ -732,6 +735,7 @@ export type Database = {
           company_id: string
           created_at?: string
           id?: string
+          invoice_number?: string | null
           movement_type: string
           product_id: string
           product_name: string
@@ -740,6 +744,8 @@ export type Database = {
           quantity_before: number
           reason?: string | null
           reference?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
           total_value?: number
           unit_cost?: number
           user_id?: string | null
@@ -748,6 +754,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           id?: string
+          invoice_number?: string | null
           movement_type?: string
           product_id?: string
           product_name?: string
@@ -756,6 +763,8 @@ export type Database = {
           quantity_before?: number
           reason?: string | null
           reference?: string | null
+          supplier_id?: string | null
+          supplier_name?: string | null
           total_value?: number
           unit_cost?: number
           user_id?: string | null
@@ -774,6 +783,54 @@ export type Database = {
         Update: {
           created_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          company_id: string
+          contact_name: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          phone: string | null
+          siret: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          company_id: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          phone?: string | null
+          siret?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          company_id?: string
+          contact_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          siret?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -855,18 +912,33 @@ export type Database = {
         Args: { _company_id: string; _opening_amount: number }
         Returns: string
       }
-      record_stock_movement: {
-        Args: {
-          _movement_type: string
-          _product_id: string
-          _quantity: number
-          _reason?: string
-          _reference?: string
-          _target_quantity?: number
-          _unit_cost?: number
-        }
-        Returns: string
-      }
+      record_stock_movement:
+        | {
+            Args: {
+              _movement_type: string
+              _product_id: string
+              _quantity: number
+              _reason?: string
+              _reference?: string
+              _target_quantity?: number
+              _unit_cost?: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _invoice_number?: string
+              _movement_type: string
+              _product_id: string
+              _quantity: number
+              _reason?: string
+              _reference?: string
+              _supplier_id?: string
+              _target_quantity?: number
+              _unit_cost?: number
+            }
+            Returns: string
+          }
     }
     Enums: {
       app_role:
