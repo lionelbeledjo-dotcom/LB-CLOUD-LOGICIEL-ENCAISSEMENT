@@ -465,14 +465,38 @@ function MovementTab({
           </p>
         </div>
         <div>
-          <Label>Référence</Label>
+          <Label>Référence interne</Label>
           <Input value={reference} onChange={(e) => setReference(e.target.value)}
-            placeholder={kind === "entree" ? "Bon de livraison, facture fournisseur…" : "Bon de sortie…"} />
+            placeholder={kind === "entree" ? "Bon de livraison interne…" : "Bon de sortie…"} />
         </div>
-        <div>
-          <Label>Motif / notes</Label>
-          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} />
-        </div>
+        {kind === "entree" && (
+          <>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label>Fournisseur</Label>
+                <button
+                  type="button"
+                  className="text-[11px] text-brand hover:underline"
+                  onClick={() => setNewSupplierOpen(true)}
+                >+ Nouveau</button>
+              </div>
+              <Select value={supplierId || "none"} onValueChange={(v) => setSupplierId(v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Aucun —</SelectItem>
+                  {(suppliers ?? []).map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>N° facture / BL fournisseur</Label>
+              <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)}
+                placeholder="FA-2025-0042" />
+            </div>
+          </>
+        )}
         {quantity && unitCost && (
           <div className="text-sm text-muted-foreground">
             Valeur du mouvement : <span className="text-foreground tabular-nums font-semibold">
