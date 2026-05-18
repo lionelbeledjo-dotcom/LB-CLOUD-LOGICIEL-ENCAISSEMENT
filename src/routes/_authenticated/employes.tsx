@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Users, UserPlus, Shield, Power, PowerOff, Mail, Phone } from "lucide-react";
+import { Users, UserPlus, Shield, Power, PowerOff, Mail, Phone, KeyRound, Copy } from "lucide-react";
 import { useActiveCompany } from "@/hooks/use-company";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
