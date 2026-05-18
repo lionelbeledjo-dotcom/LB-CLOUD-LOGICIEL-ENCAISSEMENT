@@ -119,6 +119,24 @@ function SuperAdminLogs() {
             {(companies ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-8"
+          disabled={!filtered.length}
+          onClick={() => {
+            const csv = toCSV(filtered, companyMap);
+            const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `audit-logs-${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          <Download className="size-4 mr-1" /> CSV
+        </Button>
       </div>
 
       {isLoading ? (
