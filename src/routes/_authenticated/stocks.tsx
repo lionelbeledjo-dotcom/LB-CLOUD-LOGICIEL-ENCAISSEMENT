@@ -100,7 +100,7 @@ function StocksPage() {
           <TabsTrigger value="pertes"><TrendingDown className="size-4 mr-2" />Pertes</TabsTrigger>
         </TabsList>
         <TabsContent value="overview"><OverviewTab companyId={companyId} /></TabsContent>
-        <TabsContent value="entree"><MovementTab companyId={companyId} kind="entree" /></TabsContent>
+        <TabsContent value="entree"><MultiEntryTab companyId={companyId} /></TabsContent>
         <TabsContent value="sortie"><MovementTab companyId={companyId} kind="sortie" /></TabsContent>
         <TabsContent value="inventaire"><InventoryTab companyId={companyId} /></TabsContent>
         <TabsContent value="alertes"><AlertsTab companyId={companyId} /></TabsContent>
