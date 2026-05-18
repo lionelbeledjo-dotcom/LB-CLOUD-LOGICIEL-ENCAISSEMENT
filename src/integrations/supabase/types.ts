@@ -711,6 +711,57 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_movements: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          movement_type: string
+          product_id: string
+          product_name: string
+          quantity: number
+          quantity_after: number
+          quantity_before: number
+          reason: string | null
+          reference: string | null
+          total_value: number
+          unit_cost: number
+          user_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          movement_type: string
+          product_id: string
+          product_name: string
+          quantity: number
+          quantity_after: number
+          quantity_before: number
+          reason?: string | null
+          reference?: string | null
+          total_value?: number
+          unit_cost?: number
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          movement_type?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          quantity_after?: number
+          quantity_before?: number
+          reason?: string | null
+          reference?: string | null
+          total_value?: number
+          unit_cost?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       super_admins: {
         Row: {
           created_at: string
@@ -802,6 +853,18 @@ export type Database = {
       next_invoice_number: { Args: { _company_id: string }; Returns: string }
       open_cash_session: {
         Args: { _company_id: string; _opening_amount: number }
+        Returns: string
+      }
+      record_stock_movement: {
+        Args: {
+          _movement_type: string
+          _product_id: string
+          _quantity: number
+          _reason?: string
+          _reference?: string
+          _target_quantity?: number
+          _unit_cost?: number
+        }
         Returns: string
       }
     }
