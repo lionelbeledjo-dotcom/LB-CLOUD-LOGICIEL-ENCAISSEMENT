@@ -99,7 +99,7 @@ function SuperAdminLogs() {
   return (
     <div className="rounded-xl ring-1 ring-border bg-surface/60 overflow-hidden">
       <div className="p-3 border-b border-border flex flex-wrap items-center gap-2">
-        <ScrollText className="size-4 text-brand" />
+        <ScrollText className="size-4 text-primary" />
         <h2 className="text-sm font-semibold">Logs globaux</h2>
         <div className="flex-1" />
         <Search className="size-4 text-muted-foreground" />

@@ -522,7 +522,7 @@ function SecuritySection() {
             </div>
             <a
               href="/super-admin/mfa"
-              className="text-xs text-brand hover:underline"
+              className="text-xs text-primary hover:underline"
               onClick={(e) => { if (enrolling) e.preventDefault(); }}
             >
               Configurer la 2FA

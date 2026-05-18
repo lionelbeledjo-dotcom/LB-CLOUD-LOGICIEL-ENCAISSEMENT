@@ -40,7 +40,7 @@ function LandingPage() {
             </Link>
             <Link
               to="/login"
-              className="px-4 py-2 text-sm font-semibold bg-brand text-primary-foreground rounded-md hover:bg-brand/90 transition-all shadow-brand ring-1 ring-brand"
+              className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-all shadow-md shadow-primary/30 ring-1 ring-primary"
             >
               Essai gratuit
             </Link>
@@ -50,15 +50,15 @@ function LandingPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 size-[700px] rounded-full bg-brand/10 blur-[140px] pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 size-[700px] rounded-full bg-primary/10 blur-[140px] pointer-events-none" />
         <div className="relative max-w-4xl mx-auto px-6 py-28 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface ring-1 ring-border rounded-full text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-8">
-            <span className="size-1.5 rounded-full bg-brand animate-pulse" />
+            <span className="size-1.5 rounded-full bg-primary animate-pulse" />
             Conforme NF525 · RGPD
           </div>
           <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight text-balance">
             L'encaissement français,{" "}
-            <span className="text-brand">enfin moderne.</span>
+            <span className="text-primary">enfin moderne.</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
             Lb Cloud unifie caisse, stock, comptabilité et équipes pour les commerces de
@@ -67,7 +67,7 @@ function LandingPage() {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 bg-brand text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold hover:bg-brand/90 transition-all shadow-brand ring-1 ring-brand"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold hover:bg-primary/90 transition-all shadow-md shadow-primary/30 ring-1 ring-primary"
             >
               Démarrer l'essai gratuit
               <ArrowRight className="size-4" />
@@ -85,7 +85,7 @@ function LandingPage() {
       {/* Features */}
       <section id="fonctionnalites" className="max-w-6xl mx-auto px-6 py-20">
         <div className="text-center mb-14">
-          <p className="text-[10px] font-semibold text-brand uppercase tracking-widest mb-2">
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-2">
             Une plateforme, tous vos commerces
           </p>
           <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight">
@@ -96,10 +96,10 @@ function LandingPage() {
           {features.map(({ Icon, title, desc }) => (
             <article
               key={title}
-              className="bg-surface/60 ring-1 ring-border rounded-xl p-6 hover:ring-brand/30 transition-all"
+              className="bg-surface/60 ring-1 ring-border rounded-xl p-6 hover:ring-primary/30 transition-all"
             >
               <div className="size-10 rounded-lg bg-accent flex items-center justify-center mb-4">
-                <Icon className="size-5 text-brand" />
+                <Icon className="size-5 text-primary" />
               </div>
               <h3 className="text-base font-semibold text-foreground">{title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{desc}</p>
@@ -111,7 +111,7 @@ function LandingPage() {
       {/* CTA */}
       <section className="max-w-4xl mx-auto px-6 pb-28">
         <div className="bg-surface/60 ring-1 ring-border rounded-2xl p-10 text-center relative overflow-hidden">
-          <div className="absolute -top-20 left-1/2 -translate-x-1/2 size-[400px] rounded-full bg-brand/15 blur-[120px] pointer-events-none" />
+          <div className="absolute -top-20 left-1/2 -translate-x-1/2 size-[400px] rounded-full bg-primary/15 blur-[120px] pointer-events-none" />
           <h2 className="relative text-3xl font-semibold tracking-tight">
             Prêt à digitaliser votre commerce ?
           </h2>
@@ -120,7 +120,7 @@ function LandingPage() {
           </p>
           <Link
             to="/login"
-            className="relative mt-8 inline-flex items-center gap-2 bg-brand text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold hover:bg-brand/90 transition-all shadow-brand ring-1 ring-brand"
+            className="relative mt-8 inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-md text-sm font-semibold hover:bg-primary/90 transition-all shadow-md shadow-primary/30 ring-1 ring-primary"
           >
             Créer mon compte
             <ArrowRight className="size-4" />

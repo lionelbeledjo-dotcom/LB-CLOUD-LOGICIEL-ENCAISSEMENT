@@ -1,7 +1,7 @@
 export function LbLogo({ size = 32 }: { size?: number }) {
   return (
     <div
-      className="bg-brand rounded-md flex items-center justify-center shadow-brand"
+      className="bg-primary rounded-md flex items-center justify-center shadow-md shadow-primary/30"
       style={{ width: size, height: size }}
     >
       <div
