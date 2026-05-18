@@ -117,7 +117,26 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Outlet />
-        <Toaster theme="light" position="top-right" />
+        <Toaster
+          theme="light"
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            classNames: {
+              toast:
+                "!bg-card !text-foreground !border !border-border !shadow-xl !shadow-secondary/15 !rounded-xl",
+              title: "!text-secondary !font-semibold",
+              description: "!text-muted-foreground",
+              actionButton: "!bg-primary !text-primary-foreground !rounded-md",
+              cancelButton: "!bg-muted !text-muted-foreground !rounded-md",
+              success: "!border-secondary/40",
+              error: "!border-destructive/40",
+              warning: "!border-primary/50",
+              info: "!border-secondary/40",
+            },
+          }}
+        />
       </AuthProvider>
     </QueryClientProvider>
   );
