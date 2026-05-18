@@ -371,11 +371,20 @@ function MovementTab({
 
   const selected = products?.find((p) => p.id === productId);
 
+  const lotDlcError = lotNumber.trim() && !expiryDate;
+  const expiryInvalid = expiryDate ? isNaN(new Date(expiryDate).getTime()) : false;
+
   const mut = useMutation({
     mutationFn: async () => {
       if (!productId) throw new Error("Sélectionnez un produit");
       const qty = parseFloat(quantity);
       if (!qty || qty <= 0) throw new Error("Quantité invalide");
+      if (lotNumber.trim() && !expiryDate) {
+        throw new Error("La date d'expiration (DLC) est obligatoire lorsqu'un numéro de lot est renseigné.");
+      }
+      if (expiryDate && isNaN(new Date(expiryDate).getTime())) {
+        throw new Error("La date d'expiration (DLC) n'est pas une date valide.");
+      }
       const { error } = await (supabase.rpc as any)("record_stock_movement", {
         _product_id: productId,
         _movement_type: kind,
@@ -505,12 +514,27 @@ function MovementTab({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <Label>N° lot</Label>
-            <Input value={lotNumber} onChange={(e) => setLotNumber(e.target.value)}
-              placeholder="LOT-2025-001" />
+            <Input
+              value={lotNumber}
+              onChange={(e) => setLotNumber(e.target.value)}
+              placeholder="LOT-2025-001"
+              className={lotDlcError ? "ring-1 ring-destructive" : ""}
+            />
           </div>
           <div>
             <Label>DLC / expiration</Label>
-            <Input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+            <Input
+              type="date"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+              className={lotDlcError || expiryInvalid ? "ring-1 ring-destructive" : ""}
+            />
+            {lotDlcError && (
+              <p className="text-[11px] text-destructive mt-1">DLC obligatoire si lot renseigné</p>
+            )}
+            {expiryInvalid && (
+              <p className="text-[11px] text-destructive mt-1">Date invalide</p>
+            )}
           </div>
         </div>
         <div>
