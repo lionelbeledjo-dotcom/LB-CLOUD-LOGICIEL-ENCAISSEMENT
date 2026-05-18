@@ -24,6 +24,7 @@ const navManage = [
   { to: "/stocks", label: "Stocks", icon: Boxes },
   { to: "/employes", label: "Employés", icon: Users },
   { to: "/comptabilite", label: "Comptabilité", icon: Calculator },
+  { to: "/conformite", label: "Conformité", icon: ShieldCheck },
   { to: "/parametres", label: "Paramètres", icon: Settings },
 ];
 
