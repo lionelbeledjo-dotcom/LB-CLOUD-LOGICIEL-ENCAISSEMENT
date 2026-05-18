@@ -665,6 +665,8 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
           _target_quantity: null,
           _supplier_id: supplierId || null,
           _invoice_number: invoiceNumber || null,
+          _lot_number: l.lot_number.trim() || null,
+          _expiry_date: l.expiry_date || null,
         });
         if (error) {
           const name = products?.find((p) => p.id === l.product_id)?.name ?? l.product_id;
