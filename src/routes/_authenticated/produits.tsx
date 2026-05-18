@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { Plus, Search, Pencil, Trash2, AlertTriangle, Package } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, AlertTriangle, Package, History as HistoryIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveCompany } from "@/hooks/use-company";
