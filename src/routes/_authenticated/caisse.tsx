@@ -666,13 +666,28 @@ function VenteTab({ companyId }: { companyId: string }) {
 }
 
 // ─────────────────────────────────────────── Journal du jour
+type SaleRow = {
+  id: string; invoice_number: string; sold_at: string;
+  payment_method: string; total_ht: number; total_vat: number; total_ttc: number;
+  amount_paid: number; amount_change: number; notes: string | null;
+  is_credit_note: boolean; original_sale_id: string | null;
+  sale_items: {
+    id: string; product_name: string; quantity: number;
+    unit_price_ht: number; vat_rate: number; discount_percent: number;
+    line_total_ht: number; line_total_vat: number; line_total_ttc: number;
+  }[];
+};
+
 function JournalTab({ companyId }: { companyId: string }) {
   const qc = useQueryClient();
   const [toCancel, setToCancel] = useState<{ id: string; invoice: string } | null>(null);
   const [reason, setReason] = useState("");
+  const [fromHour, setFromHour] = useState("00:00");
+  const [toHour, setToHour] = useState("23:59");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const start = useMemo(() => {
-    const d = new Date(); d.setHours(0, 0, 0, 0); return d.toISOString();
+  const dayStart = useMemo(() => {
+    const d = new Date(); d.setHours(0, 0, 0, 0); return d;
   }, []);
 
   const { data: sales, isLoading } = useQuery({
@@ -680,12 +695,16 @@ function JournalTab({ companyId }: { companyId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales")
-        .select("id, invoice_number, sold_at, payment_method, total_ttc, is_credit_note, original_sale_id")
+        .select(`id, invoice_number, sold_at, payment_method,
+                 total_ht, total_vat, total_ttc, amount_paid, amount_change, notes,
+                 is_credit_note, original_sale_id,
+                 sale_items ( id, product_name, quantity, unit_price_ht, vat_rate,
+                              discount_percent, line_total_ht, line_total_vat, line_total_ttc )`)
         .eq("company_id", companyId)
-        .gte("sold_at", start)
+        .gte("sold_at", dayStart.toISOString())
         .order("sold_at", { ascending: false });
       if (error) throw error;
-      return data as any[];
+      return data as unknown as SaleRow[];
     },
     refetchInterval: 15000,
   });
@@ -707,65 +726,233 @@ function JournalTab({ companyId }: { companyId: string }) {
     onError: (e: Error) => toast.error("Annulation refusée", { description: e.message }),
   });
 
-  const totalTtc = (sales ?? []).reduce((s, r) => s + Number(r.total_ttc), 0);
-  const cancelled = new Set((sales ?? []).filter((s) => s.original_sale_id).map((s) => s.original_sale_id));
+  // Filtre par plage horaire
+  const filtered = useMemo(() => {
+    const list = sales ?? [];
+    const [fh, fm] = fromHour.split(":").map(Number);
+    const [th, tm] = toHour.split(":").map(Number);
+    const from = new Date(dayStart); from.setHours(fh || 0, fm || 0, 0, 0);
+    const to = new Date(dayStart); to.setHours(th || 23, tm || 59, 59, 999);
+    return list.filter((s) => {
+      const t = new Date(s.sold_at).getTime();
+      return t >= from.getTime() && t <= to.getTime();
+    });
+  }, [sales, fromHour, toHour, dayStart]);
+
+  // Agrégats
+  const totals = useMemo(() => {
+    const byPayment: Record<string, { count: number; ttc: number }> = {};
+    let ht = 0, vat = 0, ttc = 0, cash = 0, change = 0;
+    let invoices = 0, credits = 0;
+    for (const s of filtered) {
+      ht += Number(s.total_ht); vat += Number(s.total_vat); ttc += Number(s.total_ttc);
+      if (s.is_credit_note) credits++; else invoices++;
+      const p = s.payment_method;
+      byPayment[p] = byPayment[p] || { count: 0, ttc: 0 };
+      byPayment[p].count++; byPayment[p].ttc += Number(s.total_ttc);
+      if (p === "especes") {
+        cash += Number(s.total_ttc);
+        change += Number(s.amount_change || 0);
+      }
+    }
+    return { ht, vat, ttc, cash, change, byPayment, invoices, credits };
+  }, [filtered]);
+
+  const cancelled = new Set(
+    (sales ?? []).filter((s) => s.original_sale_id).map((s) => s.original_sale_id!)
+  );
+
+  function toggle(id: string) {
+    setExpanded((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  }
 
   return (
     <>
       <SessionBar companyId={companyId} />
+
+      {/* Filtres */}
+      <div className="mb-4 bg-surface/60 ring-1 ring-border rounded-xl p-4 flex flex-wrap items-end gap-3">
+        <div>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">De</Label>
+          <Input type="time" value={fromHour} onChange={(e) => setFromHour(e.target.value)} className="h-8 w-28" />
+        </div>
+        <div>
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">À</Label>
+          <Input type="time" value={toHour} onChange={(e) => setToHour(e.target.value)} className="h-8 w-28" />
+        </div>
+        <div className="flex gap-1">
+          {[
+            { label: "Tout", from: "00:00", to: "23:59" },
+            { label: "Matin", from: "00:00", to: "12:00" },
+            { label: "Midi", from: "12:00", to: "14:30" },
+            { label: "Après-midi", from: "14:30", to: "19:00" },
+            { label: "Soir", from: "19:00", to: "23:59" },
+          ].map((p) => (
+            <Button key={p.label} variant="outline" size="sm" className="h-8 text-xs"
+              onClick={() => { setFromHour(p.from); setToHour(p.to); }}>{p.label}</Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Récap */}
+      <div className="mb-4 grid grid-cols-2 md:grid-cols-5 gap-3">
+        <Kpi label="Opérations" value={`${totals.invoices} + ${totals.credits} avoir`} />
+        <Kpi label="Total HT" value={eur(totals.ht)} />
+        <Kpi label="TVA" value={eur(totals.vat)} />
+        <Kpi label="Total TTC" value={eur(totals.ttc)} accent />
+        <Kpi label="Espèces (net)" value={eur(totals.cash)} sub={`Rendu ${eur(totals.change)}`} />
+      </div>
+
+      {Object.keys(totals.byPayment).length > 0 && (
+        <div className="mb-4 bg-surface/60 ring-1 ring-border rounded-xl p-4">
+          <h3 className="text-xs uppercase tracking-widest text-muted-foreground mb-3">Par mode de paiement</h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {Object.entries(totals.byPayment).map(([k, v]) => (
+              <div key={k} className="bg-background/40 ring-1 ring-border rounded-lg p-3">
+                <div className="text-xs text-muted-foreground">
+                  {PAYMENT_METHODS.find((m) => m.value === k)?.label ?? k}
+                </div>
+                <div className="text-base font-semibold text-foreground tabular-nums">{eur(v.ttc)}</div>
+                <div className="text-[10px] text-muted-foreground">{v.count} op.</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tableau */}
       <div className="bg-surface/60 ring-1 ring-border rounded-xl overflow-hidden">
         <header className="p-4 border-b border-border flex items-center justify-between">
           <div>
             <h2 className="text-base font-semibold text-foreground">Journal du jour</h2>
-            <p className="text-xs text-muted-foreground">{sales?.length ?? 0} opération(s) · Total net {eur(totalTtc)}</p>
+            <p className="text-xs text-muted-foreground">
+              {filtered.length} opération(s) entre {fromHour} et {toHour}
+            </p>
           </div>
         </header>
+
         {isLoading ? (
           <div className="p-4 space-y-2">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
-        ) : (sales?.length ?? 0) === 0 ? (
-          <div className="p-10 text-center text-sm text-muted-foreground">Aucune vente aujourd'hui.</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-10 text-center text-sm text-muted-foreground">
+            Aucune opération sur cette plage.
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
               <tr className="border-b border-border">
+                <th className="w-8 p-3" />
                 <th className="text-left p-3">Heure</th>
                 <th className="text-left p-3">N° facture</th>
                 <th className="text-left p-3">Paiement</th>
-                <th className="text-right p-3">Total TTC</th>
+                <th className="text-right p-3">HT</th>
+                <th className="text-right p-3">TVA</th>
+                <th className="text-right p-3">TTC</th>
                 <th className="text-right p-3">Action</th>
               </tr>
             </thead>
             <tbody>
-              {sales!.map((s) => {
+              {filtered.map((s) => {
                 const isCN = s.is_credit_note;
                 const wasCancelled = cancelled.has(s.id);
+                const isOpen = expanded.has(s.id);
                 return (
-                  <tr key={s.id} className={`border-b border-border/50 ${isCN ? "bg-destructive/5" : ""}`}>
-                    <td className="p-3 text-muted-foreground tabular-nums">
-                      {new Date(s.sold_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                    </td>
-                    <td className="p-3 font-medium text-foreground">
-                      {s.invoice_number} {isCN && <span className="text-xs text-destructive ml-1">(avoir)</span>}
-                      {wasCancelled && <span className="text-xs text-amber-400 ml-1">annulée</span>}
-                    </td>
-                    <td className="p-3 text-muted-foreground">
-                      {PAYMENT_METHODS.find((m) => m.value === s.payment_method)?.label ?? s.payment_method}
-                    </td>
-                    <td className={`p-3 text-right tabular-nums font-medium ${isCN ? "text-destructive" : "text-foreground"}`}>
-                      {Number(s.total_ttc).toFixed(2)} €
-                    </td>
-                    <td className="p-3 text-right">
-                      {!isCN && !wasCancelled && (
-                        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive"
-                          onClick={() => setToCancel({ id: s.id, invoice: s.invoice_number })}>
-                          <XCircle className="size-3.5 mr-1" /> Annuler
+                  <Fragment key={s.id}>
+                    <tr className={`border-b border-border/50 ${isCN ? "bg-destructive/5" : ""}`}>
+                      <td className="p-3">
+                        <Button size="icon" variant="ghost" className="size-6"
+                          onClick={() => toggle(s.id)}>
+                          {isOpen ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
                         </Button>
-                      )}
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="p-3 text-muted-foreground tabular-nums">
+                        {new Date(s.sold_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                      </td>
+                      <td className="p-3 font-medium text-foreground">
+                        {s.invoice_number}
+                        {isCN && <span className="text-xs text-destructive ml-1">(avoir)</span>}
+                        {wasCancelled && <span className="text-xs text-amber-400 ml-1">annulée</span>}
+                      </td>
+                      <td className="p-3 text-muted-foreground">
+                        {PAYMENT_METHODS.find((m) => m.value === s.payment_method)?.label ?? s.payment_method}
+                      </td>
+                      <td className={`p-3 text-right tabular-nums ${isCN ? "text-destructive" : "text-foreground"}`}>
+                        {Number(s.total_ht).toFixed(2)}
+                      </td>
+                      <td className={`p-3 text-right tabular-nums ${isCN ? "text-destructive" : "text-muted-foreground"}`}>
+                        {Number(s.total_vat).toFixed(2)}
+                      </td>
+                      <td className={`p-3 text-right tabular-nums font-medium ${isCN ? "text-destructive" : "text-foreground"}`}>
+                        {Number(s.total_ttc).toFixed(2)} €
+                      </td>
+                      <td className="p-3 text-right">
+                        {!isCN && !wasCancelled && (
+                          <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive"
+                            onClick={() => setToCancel({ id: s.id, invoice: s.invoice_number })}>
+                            <XCircle className="size-3.5 mr-1" /> Annuler
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr className={isCN ? "bg-destructive/5" : "bg-background/20"}>
+                        <td />
+                        <td colSpan={7} className="p-3">
+                          <div className="bg-background/40 ring-1 ring-border rounded-lg overflow-hidden">
+                            <table className="w-full text-xs">
+                              <thead className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                                <tr className="border-b border-border/50">
+                                  <th className="text-left p-2">Article</th>
+                                  <th className="text-right p-2">Qté</th>
+                                  <th className="text-right p-2">PU HT</th>
+                                  <th className="text-right p-2">Remise</th>
+                                  <th className="text-right p-2">TVA</th>
+                                  <th className="text-right p-2">HT</th>
+                                  <th className="text-right p-2">TTC</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {s.sale_items.map((li) => (
+                                  <tr key={li.id} className="border-b border-border/30 last:border-0">
+                                    <td className="p-2 text-foreground">{li.product_name}</td>
+                                    <td className="p-2 text-right tabular-nums">{li.quantity}</td>
+                                    <td className="p-2 text-right tabular-nums">{Number(li.unit_price_ht).toFixed(2)}</td>
+                                    <td className="p-2 text-right tabular-nums">{Number(li.discount_percent).toFixed(0)}%</td>
+                                    <td className="p-2 text-right tabular-nums">{Number(li.vat_rate).toFixed(1)}%</td>
+                                    <td className="p-2 text-right tabular-nums">{Number(li.line_total_ht).toFixed(2)}</td>
+                                    <td className="p-2 text-right tabular-nums font-medium">{Number(li.line_total_ttc).toFixed(2)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
+                            <span>Encaissé: <span className="text-foreground tabular-nums">{eur(Number(s.amount_paid))}</span></span>
+                            {Number(s.amount_change) > 0 && (
+                              <span>Rendu: <span className="text-foreground tabular-nums">{eur(Number(s.amount_change))}</span></span>
+                            )}
+                            {s.notes && <span>Note: <span className="text-foreground">{s.notes}</span></span>}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>
+            <tfoot className="text-sm font-medium">
+              <tr className="border-t border-border bg-background/30">
+                <td colSpan={4} className="p-3 text-right text-muted-foreground">Totaux</td>
+                <td className="p-3 text-right tabular-nums">{totals.ht.toFixed(2)}</td>
+                <td className="p-3 text-right tabular-nums">{totals.vat.toFixed(2)}</td>
+                <td className="p-3 text-right tabular-nums">{totals.ttc.toFixed(2)} €</td>
+                <td />
+              </tr>
+            </tfoot>
           </table>
         )}
       </div>
@@ -793,6 +980,16 @@ function JournalTab({ companyId }: { companyId: string }) {
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+function Kpi({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
+  return (
+    <div className={`rounded-lg p-3 ring-1 ${accent ? "bg-primary/10 ring-primary/30" : "bg-surface/60 ring-border"}`}>
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="text-lg font-semibold text-foreground tabular-nums mt-1">{value}</div>
+      {sub && <div className="text-[10px] text-muted-foreground mt-0.5">{sub}</div>}
+    </div>
   );
 }
 
