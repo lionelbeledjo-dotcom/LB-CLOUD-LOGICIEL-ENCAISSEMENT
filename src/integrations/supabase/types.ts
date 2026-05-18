@@ -961,6 +961,19 @@ export type Database = {
             }
             Returns: string
           }
+      super_admin_global_stats: { Args: never; Returns: Json }
+      super_admin_grant: { Args: { _user_id: string }; Returns: undefined }
+      super_admin_set_company_active: {
+        Args: { _active: boolean; _company_id: string; _reason?: string }
+        Returns: undefined
+      }
+      super_admin_set_subscription_plan: {
+        Args: {
+          _company_id: string
+          _plan: Database["public"]["Enums"]["subscription_plan"]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:
