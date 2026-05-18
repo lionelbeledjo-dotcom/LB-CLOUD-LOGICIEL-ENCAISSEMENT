@@ -517,6 +517,31 @@ function MovementTab({
           {mut.isPending ? "Enregistrement…" : (kind === "entree" ? "Enregistrer l'entrée" : "Enregistrer la sortie")}
         </Button>
       </div>
+
+      <Dialog open={newSupplierOpen} onOpenChange={setNewSupplierOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau fournisseur</DialogTitle>
+            <DialogDescription>Créer un fournisseur rattaché à votre entreprise.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Nom du fournisseur</Label>
+            <Input
+              value={newSupplierName}
+              onChange={(e) => setNewSupplierName(e.target.value)}
+              placeholder="Ex : Metro Cash & Carry"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setNewSupplierOpen(false)}>Annuler</Button>
+            <Button
+              onClick={() => createSupplier.mutate()}
+              disabled={!newSupplierName.trim() || createSupplier.isPending}
+            >{createSupplier.isPending ? "Création…" : "Créer"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
