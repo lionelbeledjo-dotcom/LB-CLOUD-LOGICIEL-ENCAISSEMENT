@@ -193,7 +193,7 @@ function SessionBar({ companyId }: { companyId: string }) {
               Attendu: <span className="text-foreground tabular-nums">{eur(expected)}</span>
             </span>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setCloseSessionDlg(true)}>
+          <Button variant="outline" size="sm" onClick={() => { setClosing(expected.toFixed(2)); setCloseSessionDlg(true); }}>
             <Lock className="size-4 mr-2" /> Clôturer
           </Button>
         </>
