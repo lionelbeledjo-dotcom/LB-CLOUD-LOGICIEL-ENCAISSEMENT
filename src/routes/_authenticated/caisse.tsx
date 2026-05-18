@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState, useMemo, useEffect, useRef, Fragment } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -28,7 +28,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export const Route = createFileRoute("/_authenticated/caisse")({
   head: () => ({ meta: [{ title: "Caisse — Lb Cloud" }] }),
   component: CaissePage,
+  errorComponent: CaisseErrorBoundary,
 });
+
+function CaisseErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
+  const router = useRouter();
+  return (
+    <div className="p-8 max-w-2xl mx-auto">
+      <div className="bg-card ring-1 ring-border rounded-xl p-10 text-center shadow-sm">
+        <AlertTriangle className="mx-auto size-10 text-destructive mb-4" />
+        <h2 className="text-lg font-semibold text-foreground mb-2">
+          Le module Caisse a rencontré une erreur
+        </h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          {error?.message ?? "Une erreur inattendue est survenue."}
+        </p>
+        <div className="flex justify-center gap-2">
+          <Button variant="outline" onClick={() => { router.invalidate(); reset(); }}>
+            Réessayer
+          </Button>
+          <Button onClick={() => router.navigate({ to: "/dashboard" })}>
+            Retour au tableau de bord
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 type Product = {
   id: string; name: string; sale_price: number; vat_rate: number;
