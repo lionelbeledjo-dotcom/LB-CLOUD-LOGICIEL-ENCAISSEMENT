@@ -54,10 +54,11 @@ type CartItem = {
 
 const PAYMENT_METHODS = [
   { value: "especes", label: "Espèces" },
-  { value: "carte_bancaire", label: "Carte bancaire" },
+  { value: "carte", label: "Carte bancaire" },
   { value: "cheque", label: "Chèque" },
   { value: "ticket_restaurant", label: "Ticket restaurant" },
   { value: "virement", label: "Virement" },
+  { value: "autre", label: "Autre" },
 ];
 
 function round2(n: number) {
@@ -197,13 +198,14 @@ function CaissePage() {
         _company_id: companyId,
         _payment_method: paymentMethod as
           | "especes"
-          | "carte_bancaire"
+          | "carte"
           | "cheque"
           | "ticket_restaurant"
-          | "virement",
-        _customer_id: null,
+          | "virement"
+          | "autre",
+        _customer_id: null as unknown as string,
         _amount_paid: paid,
-        _notes: null,
+        _notes: null as unknown as string,
         _items: cart.map((c) => ({
           product_id: c.product_id,
           product_name: c.product_name,
