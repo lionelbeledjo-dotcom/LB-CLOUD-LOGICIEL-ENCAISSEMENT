@@ -117,7 +117,25 @@ function VatTab({ companyId }: { companyId: string }) {
               </SelectContent>
             </Select>
           </div>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={report.isLoading || !report.data?.byRate.length}
+            onClick={() => {
+              if (!report.data) return;
+              const headers = ["taux", "ht", "tva", "ttc", "lignes"];
+              const rows = report.data.byRate.map(b => [
+                b.rate.toFixed(2), b.ht.toFixed(2), b.vat.toFixed(2), b.ttc.toFixed(2), b.count,
+              ]);
+              rows.push(["TOTAL", report.data.totals.ht.toFixed(2), report.data.totals.vat.toFixed(2), report.data.totals.ttc.toFixed(2), ""]);
+              downloadCSV(`tva_${year}-${String(month).padStart(2,"0")}.csv`, headers, rows);
+              toast.success("Rapport TVA téléchargé");
+            }}
+          >
+            <FileDown className="size-4 mr-2" /> CSV
+          </Button>
         </div>
+
 
         {report.isLoading ? <Skeleton className="h-32" /> : (
           <table className="w-full text-sm">
