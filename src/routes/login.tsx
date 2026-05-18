@@ -80,17 +80,18 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-6 relative overflow-hidden">
-      {/* Ambient glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 size-[600px] rounded-full bg-brand/10 blur-[120px] pointer-events-none" />
+      {/* Ambient premium glow */}
+      <div className="absolute -top-32 -left-32 size-[500px] rounded-full bg-secondary/10 blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 size-[500px] rounded-full bg-primary/15 blur-[140px] pointer-events-none" />
 
       <div className="relative w-full max-w-md">
         <Link to="/" className="flex items-center gap-3 justify-center mb-8">
           <LbLogo size={36} />
-          <span className="text-foreground font-semibold tracking-tight text-2xl">Lb Cloud</span>
+          <span className="text-secondary font-semibold tracking-tight text-2xl">Lb Cloud</span>
         </Link>
 
-        <div className="bg-surface/60 backdrop-blur-sm ring-1 ring-border rounded-2xl p-8">
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl shadow-secondary/10">
+          <h1 className="text-2xl font-semibold text-secondary tracking-tight">
             {mode === "signin" ? "Connexion" : "Créer un compte"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -103,7 +104,7 @@ function LoginPage() {
             type="button"
             onClick={handleGoogle}
             disabled={loading}
-            className="mt-6 w-full flex items-center justify-center gap-3 bg-surface-elevated ring-1 ring-border text-foreground py-2.5 rounded-md text-sm font-medium hover:bg-surface transition-colors disabled:opacity-50"
+            className="mt-6 w-full flex items-center justify-center gap-3 bg-background border border-border text-foreground py-2.5 rounded-md text-sm font-medium hover:bg-muted transition-colors disabled:opacity-50"
           >
             <svg className="size-4" viewBox="0 0 24 24" aria-hidden>
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -129,7 +130,7 @@ function LoginPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="mt-1.5 w-full bg-surface-elevated ring-1 ring-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-brand/50 focus:outline-none"
+                  className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none transition-colors"
                   placeholder="Jean Dupont"
                 />
               </div>
@@ -141,7 +142,7 @@ function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5 w-full bg-surface-elevated ring-1 ring-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-brand/50 focus:outline-none"
+                className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none transition-colors"
                 placeholder="vous@entreprise.fr"
               />
             </div>
@@ -153,7 +154,7 @@ function LoginPage() {
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5 w-full bg-surface-elevated ring-1 ring-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:ring-brand/50 focus:outline-none"
+                className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none transition-colors"
                 placeholder="••••••••"
               />
             </div>
@@ -161,7 +162,7 @@ function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand text-primary-foreground py-2.5 rounded-md text-sm font-semibold hover:bg-brand/90 transition-all active:scale-[0.99] shadow-brand ring-1 ring-brand disabled:opacity-50"
+              className="w-full bg-primary text-primary-foreground py-2.5 rounded-md text-sm font-semibold hover:bg-primary/90 transition-all active:scale-[0.99] shadow-lg shadow-primary/30 disabled:opacity-50"
             >
               {loading ? "Patientez..." : mode === "signin" ? "Se connecter" : "Créer le compte"}
             </button>
@@ -170,7 +171,7 @@ function LoginPage() {
           <button
             type="button"
             onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="mt-6 w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="mt-6 w-full text-center text-xs text-muted-foreground hover:text-secondary transition-colors"
           >
             {mode === "signin" ? "Pas encore de compte ? Créer un compte" : "Déjà un compte ? Se connecter"}
           </button>
