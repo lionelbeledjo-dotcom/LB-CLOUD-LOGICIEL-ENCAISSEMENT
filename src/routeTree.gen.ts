@@ -21,6 +21,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
 import { Route as AuthenticatedSuperAdminIndexRouteImport } from './routes/_authenticated/super-admin.index'
+import { Route as AuthenticatedSuperAdminEntreprisesRouteImport } from './routes/_authenticated/super-admin.entreprises'
 import { Route as AuthenticatedProduitsProductIdRouteImport } from './routes/_authenticated/produits.$productId'
 
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
@@ -83,6 +84,12 @@ const AuthenticatedSuperAdminIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedSuperAdminRoute,
   } as any)
+const AuthenticatedSuperAdminEntreprisesRoute =
+  AuthenticatedSuperAdminEntreprisesRouteImport.update({
+    id: '/entreprises',
+    path: '/entreprises',
+    getParentRoute: () => AuthenticatedSuperAdminRoute,
+  } as any)
 const AuthenticatedProduitsProductIdRoute =
   AuthenticatedProduitsProductIdRouteImport.update({
     id: '/$productId',
@@ -102,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/stocks': typeof AuthenticatedStocksRoute
   '/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
+  '/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
   '/super-admin/': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -115,6 +123,7 @@ export interface FileRoutesByTo {
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
+  '/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
   '/super-admin': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -131,6 +140,7 @@ export interface FileRoutesById {
   '/_authenticated/stocks': typeof AuthenticatedStocksRoute
   '/_authenticated/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
   '/_authenticated/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
+  '/_authenticated/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
   '/_authenticated/super-admin/': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/stocks'
     | '/super-admin'
     | '/produits/$productId'
+    | '/super-admin/entreprises'
     | '/super-admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/produits'
     | '/stocks'
     | '/produits/$productId'
+    | '/super-admin/entreprises'
     | '/super-admin'
   id:
     | '__root__'
@@ -175,6 +187,7 @@ export interface FileRouteTypes {
     | '/_authenticated/stocks'
     | '/_authenticated/super-admin'
     | '/_authenticated/produits/$productId'
+    | '/_authenticated/super-admin/entreprises'
     | '/_authenticated/super-admin/'
   fileRoutesById: FileRoutesById
 }
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSuperAdminIndexRouteImport
       parentRoute: typeof AuthenticatedSuperAdminRoute
     }
+    '/_authenticated/super-admin/entreprises': {
+      id: '/_authenticated/super-admin/entreprises'
+      path: '/entreprises'
+      fullPath: '/super-admin/entreprises'
+      preLoaderRoute: typeof AuthenticatedSuperAdminEntreprisesRouteImport
+      parentRoute: typeof AuthenticatedSuperAdminRoute
+    }
     '/_authenticated/produits/$productId': {
       id: '/_authenticated/produits/$productId'
       path: '/$productId'
@@ -296,11 +316,14 @@ const AuthenticatedProduitsRouteWithChildren =
   )
 
 interface AuthenticatedSuperAdminRouteChildren {
+  AuthenticatedSuperAdminEntreprisesRoute: typeof AuthenticatedSuperAdminEntreprisesRoute
   AuthenticatedSuperAdminIndexRoute: typeof AuthenticatedSuperAdminIndexRoute
 }
 
 const AuthenticatedSuperAdminRouteChildren: AuthenticatedSuperAdminRouteChildren =
   {
+    AuthenticatedSuperAdminEntreprisesRoute:
+      AuthenticatedSuperAdminEntreprisesRoute,
     AuthenticatedSuperAdminIndexRoute: AuthenticatedSuperAdminIndexRoute,
   }
 
