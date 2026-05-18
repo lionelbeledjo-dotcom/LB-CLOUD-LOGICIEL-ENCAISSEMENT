@@ -361,6 +361,9 @@ function VatRatesSection({ companyId }: { companyId: string }) {
 }
 
 function InvoicingSection({ companyId }: { companyId: string }) {
+  const qc = useQueryClient();
+  const [uploading, setUploading] = useState(false);
+
   const { data, isLoading } = useQuery({
     queryKey: ["invoice-counters", companyId],
     queryFn: async () => {
@@ -373,7 +376,59 @@ function InvoicingSection({ companyId }: { companyId: string }) {
     },
   });
 
+  const setLogoUrl = useMutation({
+    mutationFn: async (url: string | null) => {
+      const { error } = await supabase
+        .from("companies")
+        .update({ logo_url: url })
+        .eq("id", companyId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["invoice-counters", companyId] });
+      qc.invalidateQueries({ queryKey: ["company-settings", companyId] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erreur"),
+  });
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Le fichier doit être une image");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image trop volumineuse (max 2 Mo)");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${companyId}/logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("company-logos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("company-logos").getPublicUrl(path);
+      await setLogoUrl.mutateAsync(pub.publicUrl);
+      toast.success("Logo enregistré");
+    } catch (err: any) {
+      toast.error(err.message ?? "Échec du téléversement");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeLogo = async () => {
+    await setLogoUrl.mutateAsync(null);
+    toast.success("Logo supprimé");
+  };
+
   if (isLoading) return <Skeleton className="h-48 w-full" />;
+
+  const logoUrl = data?.company?.logo_url ?? "";
 
   return (
     <Card title="Configuration facturation" description="Numérotation et identité visuelle des factures.">
@@ -382,9 +437,45 @@ function InvoicingSection({ companyId }: { companyId: string }) {
           <Input value={data?.company?.subscription_plan ?? ""} disabled />
         </Field>
         <Field label="URL du logo">
-          <Input value={data?.company?.logo_url ?? ""} disabled placeholder="Non configuré" />
+          <Input value={logoUrl} disabled placeholder="Non configuré" />
         </Field>
       </div>
+
+      <div className="rounded-lg ring-1 ring-border/60 bg-surface/40 p-4 flex flex-wrap items-center gap-4">
+        <div className="size-20 rounded-lg ring-1 ring-border bg-background flex items-center justify-center overflow-hidden shrink-0">
+          {logoUrl ? (
+            <img src={logoUrl} alt="Logo entreprise" className="max-h-full max-w-full object-contain" />
+          ) : (
+            <span className="text-[10px] text-muted-foreground">Aucun logo</span>
+          )}
+        </div>
+        <div className="flex-1 min-w-[200px] space-y-2">
+          <p className="text-sm font-medium">Logo de l'entreprise</p>
+          <p className="text-xs text-muted-foreground">
+            PNG, JPG ou SVG. Max 2 Mo. Affiché sur vos factures et tickets.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <label>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleUpload}
+                disabled={uploading}
+              />
+              <span className="inline-flex items-center gap-2 rounded-md bg-primary text-primary-foreground text-xs font-medium px-3 py-2 cursor-pointer hover:opacity-90">
+                {uploading ? "Téléversement…" : logoUrl ? "Remplacer" : "Téléverser un logo"}
+              </span>
+            </label>
+            {logoUrl && (
+              <Button size="sm" variant="ghost" onClick={removeLogo} disabled={uploading}>
+                <Trash2 className="size-4 mr-1" /> Supprimer
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="rounded-lg ring-1 ring-border/60 bg-surface/40 p-4 text-xs text-muted-foreground space-y-1">
         <p>• Format de numérotation : <span className="font-mono">FAC-AAAAMM-XXXX</span></p>
         <p>• Compteur réinitialisé chaque mois.</p>
@@ -394,6 +485,7 @@ function InvoicingSection({ companyId }: { companyId: string }) {
     </Card>
   );
 }
+
 
 function SecuritySection() {
   const [enrolling, setEnrolling] = useState(false);
