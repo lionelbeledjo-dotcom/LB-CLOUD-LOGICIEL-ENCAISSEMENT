@@ -238,7 +238,25 @@ function CaissePage() {
       setConfirmOpen(false);
       toast.success("Vente enregistrée");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      const parsed = parseStockError(e.message);
+      if (parsed) {
+        setStockError(parsed);
+        // Sync cart with the real available stock so the cashier sees it immediately
+        setCart((prev) =>
+          prev.map((c) =>
+            c.product_name === parsed.product
+              ? { ...c, stock_available: parsed.available }
+              : c,
+          ),
+        );
+        toast.error("Stock insuffisant", {
+          description: `${parsed.product} — demandé ${parsed.requested}, disponible ${parsed.available}`,
+        });
+      } else {
+        toast.error("Échec de la vente", { description: e.message });
+      }
+    },
   });
 
   if (loadingCompany) {
