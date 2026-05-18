@@ -737,11 +737,13 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
           <table className="w-full text-sm">
             <thead className="bg-surface/80 text-xs text-muted-foreground">
               <tr>
-                <th className="text-left px-3 py-2 w-[40%]">Produit</th>
-                <th className="text-right px-3 py-2 w-[120px]">Stock actuel</th>
-                <th className="text-right px-3 py-2 w-[120px]">Quantité</th>
-                <th className="text-right px-3 py-2 w-[140px]">Prix unitaire (€)</th>
-                <th className="text-right px-3 py-2 w-[120px]">Valeur</th>
+                <th className="text-left px-3 py-2 w-[28%]">Produit</th>
+                <th className="text-right px-3 py-2 w-[100px]">Stock</th>
+                <th className="text-right px-3 py-2 w-[100px]">Quantité</th>
+                <th className="text-right px-3 py-2 w-[120px]">PU (€)</th>
+                <th className="text-left px-3 py-2 w-[140px]">N° lot</th>
+                <th className="text-left px-3 py-2 w-[150px]">DLC</th>
+                <th className="text-right px-3 py-2 w-[110px]">Valeur</th>
                 <th className="w-10"></th>
               </tr>
             </thead>
@@ -749,6 +751,11 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
               {lines.map((l) => {
                 const p = products?.find((x) => x.id === l.product_id);
                 const lineVal = (parseFloat(l.quantity) || 0) * (parseFloat(l.unit_cost) || 0);
+                const exp = l.expiry_date ? new Date(l.expiry_date) : null;
+                const daysLeft = exp ? Math.ceil((exp.getTime() - Date.now()) / 86400000) : null;
+                const expClass = daysLeft === null ? "" : daysLeft < 0
+                  ? "ring-red-500/40 text-red-300"
+                  : daysLeft <= 30 ? "ring-amber-500/40 text-amber-300" : "";
                 return (
                   <tr key={l.key} className="border-t border-border/40 align-top">
                     <td className="px-3 py-2">
@@ -776,6 +783,21 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
                         value={l.unit_cost}
                         onChange={(e) => updateLine(l.key, { unit_cost: e.target.value })} />
                     </td>
+                    <td className="px-3 py-2">
+                      <Input className="h-9" placeholder="LOT-…"
+                        value={l.lot_number}
+                        onChange={(e) => updateLine(l.key, { lot_number: e.target.value })} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <Input type="date" className={`h-9 ${expClass}`}
+                        value={l.expiry_date}
+                        onChange={(e) => updateLine(l.key, { expiry_date: e.target.value })} />
+                      {daysLeft !== null && (
+                        <p className={`text-[10px] mt-0.5 ${daysLeft < 0 ? "text-red-300" : daysLeft <= 30 ? "text-amber-300" : "text-muted-foreground"}`}>
+                          {daysLeft < 0 ? `Expirée (${-daysLeft}j)` : `J-${daysLeft}`}
+                        </p>
+                      )}
+                    </td>
                     <td className="px-3 py-2 text-right tabular-nums">
                       {lineVal ? eur(lineVal) : "—"}
                     </td>
@@ -791,7 +813,7 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
             </tbody>
             <tfoot>
               <tr className="border-t border-border bg-surface/60">
-                <td colSpan={4} className="px-3 py-2 text-right text-sm font-semibold">Total entrée</td>
+                <td colSpan={6} className="px-3 py-2 text-right text-sm font-semibold">Total entrée</td>
                 <td className="px-3 py-2 text-right text-sm font-semibold tabular-nums">{eur(totalValue)}</td>
                 <td></td>
               </tr>
