@@ -149,6 +149,50 @@ export const updateEmployeRole = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const updateEmployeProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: {
+    companyId: string;
+    targetUserId: string;
+    fullName?: string;
+    phone?: string | null;
+    avatarUrl?: string | null;
+  }) =>
+    z.object({
+      companyId: z.string().uuid(),
+      targetUserId: z.string().uuid(),
+      fullName: z.string().trim().min(1).max(120).optional(),
+      phone: z.string().trim().max(40).nullable().optional(),
+      avatarUrl: z.string().trim().max(2048).url().nullable().optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    await assertAdmin(supabase, data.companyId, userId);
+
+    // Ensure target belongs to the same company
+    const { data: member, error: memberErr } = await supabase
+      .from("company_members")
+      .select("id")
+      .eq("company_id", data.companyId)
+      .eq("user_id", data.targetUserId)
+      .maybeSingle();
+    if (memberErr) throw new Error(memberErr.message);
+    if (!member) throw new Error("Cet utilisateur n'appartient pas à l'entreprise.");
+
+    const patch: Record<string, any> = {};
+    if (data.fullName !== undefined) patch.full_name = data.fullName;
+    if (data.phone !== undefined) patch.phone = data.phone || null;
+    if (data.avatarUrl !== undefined) patch.avatar_url = data.avatarUrl || null;
+
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .upsert({ user_id: data.targetUserId, ...patch }, { onConflict: "user_id" });
+    if (error) throw new Error(error.message);
+
+    return { ok: true };
+  });
+
 export const setEmployeActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { companyId: string; memberId: string; isActive: boolean }) =>
