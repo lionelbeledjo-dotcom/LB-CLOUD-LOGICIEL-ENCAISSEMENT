@@ -94,6 +94,7 @@ function SuperAdminLayout() {
         <Tab to="/super-admin/entreprises" label="Entreprises" icon={Building2} />
         <Tab to="/super-admin/abonnements" label="Abonnements" icon={CreditCard} />
         <Tab to="/super-admin/logs" label="Logs globaux" icon={ScrollText} />
+        <Tab to="/super-admin/admins" label="Super admins" icon={ShieldCheck} />
         <Tab to="/super-admin/mfa" label="2FA" icon={KeyRound} />
       </nav>
 
