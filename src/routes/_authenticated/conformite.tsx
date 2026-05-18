@@ -510,8 +510,11 @@ function RgpdTab({ companyId }: { companyId: string }) {
                   <p className="text-xs text-muted-foreground">{c.email ?? "—"} · {c.phone ?? "—"}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => doExport(c.id, c.full_name)}>
-                    <Download className="size-3 mr-1" /> Exporter
+                  <Button size="sm" variant="outline" onClick={() => doExport(c.id, c.full_name, "json")}>
+                    <Download className="size-3 mr-1" /> JSON
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => doExport(c.id, c.full_name, "csv")}>
+                    <Download className="size-3 mr-1" /> CSV
                   </Button>
                   <Button
                     size="sm" variant="destructive"
