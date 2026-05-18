@@ -514,12 +514,27 @@ function MovementTab({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <Label>N° lot</Label>
-            <Input value={lotNumber} onChange={(e) => setLotNumber(e.target.value)}
-              placeholder="LOT-2025-001" />
+            <Input
+              value={lotNumber}
+              onChange={(e) => setLotNumber(e.target.value)}
+              placeholder="LOT-2025-001"
+              className={lotDlcError ? "ring-1 ring-destructive" : ""}
+            />
           </div>
           <div>
             <Label>DLC / expiration</Label>
-            <Input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+            <Input
+              type="date"
+              value={expiryDate}
+              onChange={(e) => setExpiryDate(e.target.value)}
+              className={lotDlcError || expiryInvalid ? "ring-1 ring-destructive" : ""}
+            />
+            {lotDlcError && (
+              <p className="text-[11px] text-destructive mt-1">DLC obligatoire si lot renseigné</p>
+            )}
+            {expiryInvalid && (
+              <p className="text-[11px] text-destructive mt-1">Date invalide</p>
+            )}
           </div>
         </div>
         <div>
