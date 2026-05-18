@@ -158,8 +158,15 @@ function SessionBar({ companyId }: { companyId: string }) {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Caisse clôturée");
-      setCloseSessionDlg(false); setClosing(""); setNotes("");
+      const v = (parseFloat(closing) || 0) - expected;
+      if (Math.abs(v) < 0.01) {
+        toast.success("Caisse clôturée — écart nul");
+      } else if (v < 0) {
+        toast.warning(`Caisse clôturée avec un manquant de ${eur(Math.abs(v))}`);
+      } else {
+        toast.warning(`Caisse clôturée avec un excédent de ${eur(v)}`);
+      }
+      setCloseSessionDlg(false); setClosing(""); setNotes(""); setAckVariance(false);
       qc.invalidateQueries({ queryKey: ["cash-session", companyId] });
     },
     onError: (e: Error) => toast.error(e.message),
