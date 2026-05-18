@@ -392,6 +392,89 @@ function EmployesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit profile dialog */}
+      <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le profil</DialogTitle>
+            <DialogDescription>
+              Mettez à jour le nom, le téléphone et l'avatar de l'employé.
+            </DialogDescription>
+          </DialogHeader>
+          {editTarget && (
+            <div className="space-y-4 py-2">
+              <div className="flex items-center gap-4">
+                <Avatar className="size-16">
+                  {editTarget.avatarUrl ? <AvatarImage src={editTarget.avatarUrl} alt="" /> : null}
+                  <AvatarFallback>
+                    {(editTarget.fullName || "?").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={fileRef} type="file" accept="image/*" hidden
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) onPickAvatar(f);
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button" variant="outline" size="sm"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      <Upload className="size-4 mr-1.5" />
+                      {uploading ? "Téléversement…" : "Changer"}
+                    </Button>
+                    {editTarget.avatarUrl && (
+                      <Button
+                        type="button" variant="ghost" size="sm"
+                        onClick={() => setEditTarget({ ...editTarget, avatarUrl: null })}
+                        disabled={uploading}
+                      >
+                        <X className="size-4 mr-1.5" />Retirer
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">PNG/JPG, max 5 Mo.</p>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-fn">Nom complet</Label>
+                <Input
+                  id="edit-fn" value={editTarget.fullName}
+                  onChange={(e) => setEditTarget({ ...editTarget, fullName: e.target.value })}
+                  maxLength={120}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-ph">Téléphone</Label>
+                <Input
+                  id="edit-ph" value={editTarget.phone}
+                  onChange={(e) => setEditTarget({ ...editTarget, phone: e.target.value })}
+                  placeholder="+33 6 12 34 56 78" maxLength={40}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditTarget(null)}>Annuler</Button>
+            <Button
+              onClick={() => editTarget && updateMut.mutate({
+                targetUserId: editTarget.userId,
+                fullName: editTarget.fullName.trim(),
+                phone: editTarget.phone.trim(),
+                avatarUrl: editTarget.avatarUrl,
+              })}
+              disabled={!editTarget?.fullName.trim() || updateMut.isPending || uploading}
+            >
+              {updateMut.isPending ? "Enregistrement…" : "Enregistrer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
