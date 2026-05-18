@@ -18,6 +18,7 @@ import { Route as AuthenticatedSuperAdminRouteImport } from './routes/_authentic
 import { Route as AuthenticatedStocksRouteImport } from './routes/_authenticated/stocks'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
 import { Route as AuthenticatedParametresRouteImport } from './routes/_authenticated/parametres'
+import { Route as AuthenticatedEmployesRouteImport } from './routes/_authenticated/employes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
@@ -71,6 +72,11 @@ const AuthenticatedProduitsRoute = AuthenticatedProduitsRouteImport.update({
 const AuthenticatedParametresRoute = AuthenticatedParametresRouteImport.update({
   id: '/parametres',
   path: '/parametres',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedEmployesRoute = AuthenticatedEmployesRouteImport.update({
+  id: '/employes',
+  path: '/employes',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/caisse': typeof AuthenticatedCaisseRoute
   '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/employes': typeof AuthenticatedEmployesRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
@@ -159,6 +166,7 @@ export interface FileRoutesByTo {
   '/caisse': typeof AuthenticatedCaisseRoute
   '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/employes': typeof AuthenticatedEmployesRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
   '/_authenticated/conformite': typeof AuthenticatedConformiteRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/employes': typeof AuthenticatedEmployesRoute
   '/_authenticated/parametres': typeof AuthenticatedParametresRoute
   '/_authenticated/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/_authenticated/stocks': typeof AuthenticatedStocksRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/caisse'
     | '/conformite'
     | '/dashboard'
+    | '/employes'
     | '/parametres'
     | '/produits'
     | '/stocks'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/caisse'
     | '/conformite'
     | '/dashboard'
+    | '/employes'
     | '/parametres'
     | '/produits'
     | '/stocks'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/_authenticated/caisse'
     | '/_authenticated/conformite'
     | '/_authenticated/dashboard'
+    | '/_authenticated/employes'
     | '/_authenticated/parametres'
     | '/_authenticated/produits'
     | '/_authenticated/stocks'
@@ -326,6 +338,13 @@ declare module '@tanstack/react-router' {
       path: '/parametres'
       fullPath: '/parametres'
       preLoaderRoute: typeof AuthenticatedParametresRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/employes': {
+      id: '/_authenticated/employes'
+      path: '/employes'
+      fullPath: '/employes'
+      preLoaderRoute: typeof AuthenticatedEmployesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
@@ -444,6 +463,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCaisseRoute: typeof AuthenticatedCaisseRoute
   AuthenticatedConformiteRoute: typeof AuthenticatedConformiteRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEmployesRoute: typeof AuthenticatedEmployesRoute
   AuthenticatedParametresRoute: typeof AuthenticatedParametresRoute
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRouteWithChildren
   AuthenticatedStocksRoute: typeof AuthenticatedStocksRoute
@@ -454,6 +474,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCaisseRoute: AuthenticatedCaisseRoute,
   AuthenticatedConformiteRoute: AuthenticatedConformiteRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEmployesRoute: AuthenticatedEmployesRoute,
   AuthenticatedParametresRoute: AuthenticatedParametresRoute,
   AuthenticatedProduitsRoute: AuthenticatedProduitsRouteWithChildren,
   AuthenticatedStocksRoute: AuthenticatedStocksRoute,
