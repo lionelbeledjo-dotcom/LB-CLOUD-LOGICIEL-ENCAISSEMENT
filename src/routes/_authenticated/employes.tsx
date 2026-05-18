@@ -243,7 +243,14 @@ function EmployesPage() {
                   <Badge variant="secondary">Désactivé</Badge>
                 )}
               </div>
-              <div className="text-right">
+              <div className="text-right flex items-center justify-end gap-1">
+                <Button
+                  variant="ghost" size="sm"
+                  onClick={() => setResetTarget({ userId: m.user_id, name: m.full_name ?? m.email ?? "cet utilisateur" })}
+                  title="Réinitialiser le mot de passe"
+                >
+                  <KeyRound className="size-4" />
+                </Button>
                 <Button
                   variant="ghost" size="sm"
                   onClick={() => activeMut.mutate({ memberId: m.id, isActive: !m.is_active })}
@@ -258,6 +265,57 @@ function EmployesPage() {
           ))
         )}
       </div>
+
+      {/* Confirmation dialog */}
+      <Dialog open={!!resetTarget} onOpenChange={(o) => { if (!o) { setResetTarget(null); setCustomPwd(""); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+            <DialogDescription>
+              Définir un nouveau mot de passe pour <strong>{resetTarget?.name}</strong>. L'utilisateur devra l'utiliser à sa prochaine connexion.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="newpwd">Nouveau mot de passe (optionnel)</Label>
+            <Input
+              id="newpwd" type="text" value={customPwd}
+              onChange={(e) => setCustomPwd(e.target.value)}
+              placeholder="Laissez vide pour générer automatiquement"
+            />
+            <p className="text-xs text-muted-foreground">Minimum 8 caractères.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setResetTarget(null); setCustomPwd(""); }}>Annuler</Button>
+            <Button
+              onClick={() => resetMut.mutate({ targetUserId: resetTarget!.userId, password: customPwd.trim() || undefined })}
+              disabled={resetMut.isPending || (customPwd.length > 0 && customPwd.length < 8)}
+            >
+              {resetMut.isPending ? "Réinitialisation…" : "Réinitialiser"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Result dialog showing the new password */}
+      <Dialog open={!!resetResult} onOpenChange={(o) => { if (!o) setResetResult(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mot de passe réinitialisé</DialogTitle>
+            <DialogDescription>
+              Nouveau mot de passe pour <strong>{resetResult?.name}</strong>. Copiez-le maintenant — il ne sera plus affiché.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2 py-2">
+            <Input readOnly value={resetResult?.password ?? ""} className="font-mono" />
+            <Button variant="outline" size="icon" onClick={() => resetResult && copyPassword(resetResult.password)}>
+              <Copy className="size-4" />
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setResetResult(null)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
