@@ -497,6 +497,10 @@ function MovementTab({
             </div>
           </>
         )}
+        <div>
+          <Label>Motif / notes</Label>
+          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} />
+        </div>
         {quantity && unitCost && (
           <div className="text-sm text-muted-foreground">
             Valeur du mouvement : <span className="text-foreground tabular-nums font-semibold">
