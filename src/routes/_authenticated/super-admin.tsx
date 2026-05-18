@@ -80,7 +80,7 @@ function SuperAdminLayout() {
   return (
     <div className="p-6 max-w-[1600px] mx-auto">
       <header className="mb-6 flex items-center gap-3">
-        <Shield className="size-7 text-brand" />
+        <Shield className="size-7 text-primary" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Super Admin</h1>
           <p className="text-sm text-muted-foreground">
@@ -110,7 +110,7 @@ function Tab({ to, label, icon: Icon, exact }: { to: string; label: string; icon
     <Link
       to={to}
       className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm transition-colors ${
-        active ? "bg-surface ring-1 ring-brand/40 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-surface/40"
+        active ? "bg-surface ring-1 ring-primary/40 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-surface/40"
       }`}
     >
       <Icon className="size-4" /> {label}

@@ -92,7 +92,7 @@ function SuperAdminMfa() {
     <div className="grid md:grid-cols-2 gap-4">
       <section className="rounded-xl ring-1 ring-border bg-surface/60 p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="size-5 text-brand" />
+          <ShieldCheck className="size-5 text-primary" />
           <h2 className="text-base font-semibold">État 2FA</h2>
         </div>
         <p className="text-sm text-muted-foreground">

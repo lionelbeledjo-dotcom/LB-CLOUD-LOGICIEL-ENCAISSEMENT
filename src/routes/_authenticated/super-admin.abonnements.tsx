@@ -61,7 +61,7 @@ function SuperAdminSubscriptions() {
   return (
     <div className="rounded-xl ring-1 ring-border bg-surface/60 overflow-hidden">
       <div className="p-3 border-b border-border flex items-center gap-2">
-        <CreditCard className="size-4 text-brand" />
+        <CreditCard className="size-4 text-primary" />
         <h2 className="text-sm font-semibold">Gestion des abonnements</h2>
         <div className="ml-auto flex items-center gap-2">
           <Search className="size-4 text-muted-foreground" />

@@ -113,7 +113,7 @@ function SuperAdminsPage() {
     <div className="space-y-4">
       <div className="rounded-xl ring-1 ring-border bg-surface/60 p-4">
         <div className="flex items-center gap-2 mb-3">
-          <UserPlus className="size-4 text-brand" />
+          <UserPlus className="size-4 text-primary" />
           <h2 className="text-sm font-semibold">Promouvoir un utilisateur</h2>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -137,7 +137,7 @@ function SuperAdminsPage() {
 
       <div className="rounded-xl ring-1 ring-border bg-surface/60 overflow-hidden">
         <div className="p-3 border-b border-border flex flex-wrap items-center gap-2">
-          <ShieldCheck className="size-4 text-brand" />
+          <ShieldCheck className="size-4 text-primary" />
           <h2 className="text-sm font-semibold">Super administrateurs Lb Cloud</h2>
           <span className="ml-auto text-xs text-muted-foreground">
             {filtered.length} compte(s)

@@ -78,7 +78,7 @@ function StocksPage() {
   return (
     <div className="p-6 max-w-[1600px] mx-auto">
       <header className="mb-6 flex items-center gap-3">
-        <Boxes className="size-7 text-brand" />
+        <Boxes className="size-7 text-primary" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Gestion du stock</h1>
           <p className="text-sm text-muted-foreground">
@@ -426,7 +426,7 @@ function MovementTab({
               key={p.id}
               onClick={() => { setProductId(p.id); setUnitCost(String(p.purchase_price ?? "")); }}
               className={`w-full text-left px-4 py-2.5 border-b border-border/40 hover:bg-surface flex items-center justify-between gap-3 ${
-                productId === p.id ? "bg-surface ring-1 ring-brand/40" : ""
+                productId === p.id ? "bg-surface ring-1 ring-primary/40" : ""
               }`}
             >
               <div className="min-w-0">
@@ -490,7 +490,7 @@ function MovementTab({
                 <Label>Fournisseur</Label>
                 <button
                   type="button"
-                  className="text-[11px] text-brand hover:underline"
+                  className="text-[11px] text-primary hover:underline"
                   onClick={() => setNewSupplierOpen(true)}
                 >+ Nouveau</button>
               </div>
@@ -741,7 +741,7 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
         <div className="md:col-span-2">
           <div className="flex items-center justify-between mb-1">
             <Label>Fournisseur</Label>
-            <button type="button" className="text-[11px] text-brand hover:underline"
+            <button type="button" className="text-[11px] text-primary hover:underline"
               onClick={() => setNewSupplierOpen(true)}>+ Nouveau</button>
           </div>
           <Select value={supplierId || "none"} onValueChange={(v) => setSupplierId(v === "none" ? "" : v)}>

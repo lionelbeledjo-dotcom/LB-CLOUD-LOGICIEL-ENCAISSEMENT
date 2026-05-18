@@ -47,7 +47,7 @@ function SuperAdminHome() {
 
       <div className="rounded-xl ring-1 ring-border bg-surface/60 p-4">
         <h2 className="flex items-center gap-2 text-sm font-semibold mb-3">
-          <Layers className="size-4 text-brand" /> Répartition par abonnement
+          <Layers className="size-4 text-primary" /> Répartition par abonnement
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {(["essai", "standard", "premium", "entreprise"] as const).map((p) => (

@@ -43,13 +43,13 @@ export default function DashboardPage() {
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-semibold text-foreground tabular-nums">{kpi.value}</span>
-              <span className={kpi.positive ? "text-xs font-medium text-brand" : "text-xs font-medium text-muted-foreground"}>
+              <span className={kpi.positive ? "text-xs font-medium text-primary" : "text-xs font-medium text-muted-foreground"}>
                 {kpi.delta}
               </span>
             </div>
             <div className="mt-4 h-1 w-full bg-surface-elevated rounded-full overflow-hidden">
               <div
-                className={kpi.positive ? "h-full bg-brand" : "h-full bg-muted"}
+                className={kpi.positive ? "h-full bg-primary" : "h-full bg-muted"}
                 style={{ width: `${kpi.bar}%` }}
               />
             </div>
@@ -89,7 +89,7 @@ export default function DashboardPage() {
                     : "flex items-center gap-4 p-3 ring-1 ring-border rounded-lg opacity-50"
                 }
               >
-                <div className={till.open ? "size-1.5 rounded-full bg-brand" : "size-1.5 rounded-full bg-muted-foreground"} />
+                <div className={till.open ? "size-1.5 rounded-full bg-primary" : "size-1.5 rounded-full bg-muted-foreground"} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{till.name}</p>
                   <p className="text-[10px] text-muted-foreground uppercase">{till.operator}</p>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
       <section className="bg-surface/60 ring-1 ring-border rounded-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center">
           <h2 className="text-base font-semibold text-foreground">Dernières ventes</h2>
-          <button className="text-xs font-medium text-brand hover:underline underline-offset-4 inline-flex items-center gap-1">
+          <button className="text-xs font-medium text-primary hover:underline underline-offset-4 inline-flex items-center gap-1">
             Tout voir <ArrowUpRight className="size-3" />
           </button>
         </div>

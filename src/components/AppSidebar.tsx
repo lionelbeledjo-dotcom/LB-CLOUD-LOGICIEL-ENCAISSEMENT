@@ -46,10 +46,10 @@ export function AppSidebar() {
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilisateur";
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 w-64 border-r border-border bg-sidebar flex flex-col">
+    <aside className="fixed inset-y-0 left-0 z-20 w-64 bg-sidebar text-sidebar-foreground flex flex-col shadow-lg shadow-secondary/20">
       <div className="p-6 flex items-center gap-3">
         <LbLogo />
-        <span className="text-foreground font-semibold tracking-tight text-lg">Lb Cloud</span>
+        <span className="text-sidebar-foreground font-semibold tracking-tight text-lg">Lb Cloud</span>
       </div>
 
       <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
@@ -90,19 +90,19 @@ export function AppSidebar() {
         )}
       </nav>
 
-      <div className="p-4 mt-auto border-t border-border">
-        <div className="flex items-center gap-3 p-2 bg-surface/60 ring-1 ring-border rounded-lg">
-          <div className="size-9 rounded-full bg-surface-elevated flex items-center justify-center text-[11px] font-semibold text-foreground">
+      <div className="p-4 mt-auto border-t border-sidebar-border">
+        <div className="flex items-center gap-3 p-2 bg-sidebar-accent/40 ring-1 ring-sidebar-border rounded-lg">
+          <div className="size-9 rounded-full bg-sidebar-primary text-sidebar-primary-foreground flex items-center justify-center text-[11px] font-semibold">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Compte actif</p>
+            <p className="text-sm font-medium text-sidebar-foreground truncate">{displayName}</p>
+            <p className="text-[10px] text-sidebar-foreground/60 uppercase tracking-wider">Compte actif</p>
           </div>
         </div>
         <div className="mt-3 px-2 flex items-center gap-1.5">
-          <span className="size-1.5 rounded-full bg-brand" />
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+          <span className="size-1.5 rounded-full bg-sidebar-primary" />
+          <p className="text-[10px] text-sidebar-foreground/60 uppercase tracking-wider">
             NF525 · RGPD
           </p>
         </div>
@@ -113,7 +113,7 @@ export function AppSidebar() {
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-3 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+    <div className="px-3 py-2 text-[10px] font-semibold text-sidebar-foreground/50 uppercase tracking-widest">
       {children}
     </div>
   );
@@ -135,11 +135,11 @@ function NavItem({
       to={to}
       className={
         active
-          ? "flex items-center gap-3 px-3 py-2 text-sm font-medium text-foreground bg-surface ring-1 ring-border rounded-md transition-colors"
-          : "flex items-center gap-3 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-surface/50 rounded-md transition-colors"
+          ? "flex items-center gap-3 px-3 py-2 text-sm font-semibold text-sidebar-primary bg-sidebar-accent/60 rounded-md transition-colors shadow-sm"
+          : "flex items-center gap-3 px-3 py-2 text-sm font-medium text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/40 rounded-md transition-colors"
       }
     >
-      <Icon className={active ? "size-4 shrink-0 text-brand" : "size-4 shrink-0"} />
+      <Icon className={active ? "size-4 shrink-0 text-sidebar-primary" : "size-4 shrink-0 text-sidebar-foreground/70"} />
       {label}
     </Link>
   );
