@@ -230,6 +230,24 @@ export type Database = {
           },
         ]
       }
+      invoice_counters: {
+        Row: {
+          company_id: string
+          last_number: number
+          year_month: string
+        }
+        Insert: {
+          company_id: string
+          last_number?: number
+          year_month: string
+        }
+        Update: {
+          company_id?: string
+          last_number?: number
+          year_month?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           barcode: string | null
@@ -490,6 +508,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_sale: {
+        Args: {
+          _amount_paid: number
+          _company_id: string
+          _customer_id: string
+          _items: Json
+          _notes: string
+          _payment_method: Database["public"]["Enums"]["payment_method"]
+        }
+        Returns: string
+      }
       has_role_in_company: {
         Args: {
           _company_id: string
@@ -507,6 +536,7 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      next_invoice_number: { Args: { _company_id: string }; Returns: string }
     }
     Enums: {
       app_role:
