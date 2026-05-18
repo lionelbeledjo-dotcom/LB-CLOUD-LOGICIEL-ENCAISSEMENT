@@ -520,6 +520,56 @@ function CaissePage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!stockError} onOpenChange={(o) => !o && setStockError(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              Stock insuffisant
+            </DialogTitle>
+            <DialogDescription>
+              La vente a été refusée. Aucune écriture n'a été effectuée et le stock reste inchangé.
+            </DialogDescription>
+          </DialogHeader>
+          {stockError && (
+            <div className="space-y-3 py-2">
+              <div className="bg-background/40 ring-1 ring-border rounded-lg p-4">
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                  Produit en cause
+                </div>
+                <div className="text-base font-semibold text-foreground mt-1">
+                  {stockError.product}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-background/40 ring-1 ring-border rounded-lg p-4">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                    Quantité demandée
+                  </div>
+                  <div className="text-xl font-semibold text-foreground tabular-nums mt-1">
+                    {stockError.requested}
+                  </div>
+                </div>
+                <div className="bg-background/40 ring-1 ring-border rounded-lg p-4">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                    Stock disponible
+                  </div>
+                  <div className="text-xl font-semibold text-amber-400 tabular-nums mt-1">
+                    {stockError.available}
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Ajustez la quantité dans le panier ou réapprovisionnez ce produit avant de revalider.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setStockError(null)}>Compris</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!lastInvoice} onOpenChange={(o) => !o && setLastInvoice(null)}>
         <DialogContent>
           <DialogHeader>
