@@ -502,6 +502,17 @@ function MovementTab({
             </div>
           </>
         )}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label>N° lot</Label>
+            <Input value={lotNumber} onChange={(e) => setLotNumber(e.target.value)}
+              placeholder="LOT-2025-001" />
+          </div>
+          <div>
+            <Label>DLC / expiration</Label>
+            <Input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+          </div>
+        </div>
         <div>
           <Label>Motif / notes</Label>
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} />
