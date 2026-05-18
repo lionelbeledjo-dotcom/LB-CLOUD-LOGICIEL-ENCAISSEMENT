@@ -586,6 +586,12 @@ function Td({ children, className = "" }: { children: React.ReactNode; className
   return <td className={`px-3 py-2 text-sm text-foreground ${className}`}>{children}</td>;
 }
 
+function csvEsc(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+  return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
 function downloadCSV(filename: string, headers: string[], rows: (string | number)[][]) {
   const esc = (v: string | number) => {
     const s = String(v ?? "");
