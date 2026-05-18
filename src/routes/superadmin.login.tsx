@@ -82,7 +82,7 @@ function SuperAdminLoginPage() {
     <div className="min-h-screen grid place-items-center bg-background p-6">
       <div className="w-full max-w-md bg-card ring-1 ring-border rounded-2xl shadow-xl p-8">
         <div className="flex items-center justify-center mb-6">
-          <LbLogo className="h-10" />
+          <LbLogo size={48} />
         </div>
         <div className="flex items-center justify-center gap-2 mb-2">
           <Shield className="size-5 text-primary" />
