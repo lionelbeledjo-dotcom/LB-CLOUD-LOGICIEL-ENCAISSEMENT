@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/hooks/use-auth";
+import { CookieConsent } from "@/components/cookie-consent";
 
 import appCss from "../styles.css?url";
 
@@ -114,6 +115,7 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <Toaster theme="dark" position="top-right" />
+        <CookieConsent />
       </AuthProvider>
     </QueryClientProvider>
   );

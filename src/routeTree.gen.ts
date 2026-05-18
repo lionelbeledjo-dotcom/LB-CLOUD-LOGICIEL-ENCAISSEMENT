@@ -9,16 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
 
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -40,6 +53,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedConformiteRoute = AuthenticatedConformiteRouteImport.update({
+  id: '/conformite',
+  path: '/conformite',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
   id: '/caisse',
   path: '/caisse',
@@ -48,15 +66,21 @@ const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
+  '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produits': typeof AuthenticatedProduitsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
+  '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produits': typeof AuthenticatedProduitsRoute
 }
@@ -64,22 +88,44 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
+  '/_authenticated/conformite': typeof AuthenticatedConformiteRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/produits': typeof AuthenticatedProduitsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/caisse' | '/dashboard' | '/produits'
+  fullPaths:
+    | '/'
+    | '/confidentialite'
+    | '/login'
+    | '/mentions-legales'
+    | '/caisse'
+    | '/conformite'
+    | '/dashboard'
+    | '/produits'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/caisse' | '/dashboard' | '/produits'
+  to:
+    | '/'
+    | '/confidentialite'
+    | '/login'
+    | '/mentions-legales'
+    | '/caisse'
+    | '/conformite'
+    | '/dashboard'
+    | '/produits'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/confidentialite'
     | '/login'
+    | '/mentions-legales'
     | '/_authenticated/caisse'
+    | '/_authenticated/conformite'
     | '/_authenticated/dashboard'
     | '/_authenticated/produits'
   fileRoutesById: FileRoutesById
@@ -87,16 +133,32 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   LoginRoute: typeof LoginRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -127,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/conformite': {
+      id: '/_authenticated/conformite'
+      path: '/conformite'
+      fullPath: '/conformite'
+      preLoaderRoute: typeof AuthenticatedConformiteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/caisse': {
       id: '/_authenticated/caisse'
       path: '/caisse'
@@ -139,12 +208,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCaisseRoute: typeof AuthenticatedCaisseRoute
+  AuthenticatedConformiteRoute: typeof AuthenticatedConformiteRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCaisseRoute: AuthenticatedCaisseRoute,
+  AuthenticatedConformiteRoute: AuthenticatedConformiteRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProduitsRoute: AuthenticatedProduitsRoute,
 }
@@ -156,7 +227,9 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   LoginRoute: LoginRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
