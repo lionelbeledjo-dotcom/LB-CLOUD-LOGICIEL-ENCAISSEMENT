@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedVentesRouteImport } from './routes/_authenticated/ventes'
 import { Route as AuthenticatedSuperAdminRouteImport } from './routes/_authenticated/super-admin'
 import { Route as AuthenticatedStocksRouteImport } from './routes/_authenticated/stocks'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
@@ -21,6 +22,7 @@ import { Route as AuthenticatedParametresRouteImport } from './routes/_authentic
 import { Route as AuthenticatedEmployesRouteImport } from './routes/_authenticated/employes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
+import { Route as AuthenticatedComptabiliteRouteImport } from './routes/_authenticated/comptabilite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
 import { Route as AuthenticatedSuperAdminIndexRouteImport } from './routes/_authenticated/super-admin.index'
 import { Route as AuthenticatedSuperAdminMfaRouteImport } from './routes/_authenticated/super-admin.mfa'
@@ -53,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedVentesRoute = AuthenticatedVentesRouteImport.update({
+  id: '/ventes',
+  path: '/ventes',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSuperAdminRoute = AuthenticatedSuperAdminRouteImport.update({
   id: '/super-admin',
@@ -89,6 +96,12 @@ const AuthenticatedConformiteRoute = AuthenticatedConformiteRouteImport.update({
   path: '/conformite',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedComptabiliteRoute =
+  AuthenticatedComptabiliteRouteImport.update({
+    id: '/comptabilite',
+    path: '/comptabilite',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
   id: '/caisse',
   path: '/caisse',
@@ -143,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
+  '/comptabilite': typeof AuthenticatedComptabiliteRoute
   '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employes': typeof AuthenticatedEmployesRoute
@@ -150,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
   '/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
+  '/ventes': typeof AuthenticatedVentesRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -164,12 +179,14 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
+  '/comptabilite': typeof AuthenticatedComptabiliteRoute
   '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employes': typeof AuthenticatedEmployesRoute
   '/parametres': typeof AuthenticatedParametresRoute
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
+  '/ventes': typeof AuthenticatedVentesRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -186,6 +203,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
+  '/_authenticated/comptabilite': typeof AuthenticatedComptabiliteRoute
   '/_authenticated/conformite': typeof AuthenticatedConformiteRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/employes': typeof AuthenticatedEmployesRoute
@@ -193,6 +211,7 @@ export interface FileRoutesById {
   '/_authenticated/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/_authenticated/stocks': typeof AuthenticatedStocksRoute
   '/_authenticated/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
+  '/_authenticated/ventes': typeof AuthenticatedVentesRoute
   '/_authenticated/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/_authenticated/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/_authenticated/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -209,6 +228,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/caisse'
+    | '/comptabilite'
     | '/conformite'
     | '/dashboard'
     | '/employes'
@@ -216,6 +236,7 @@ export interface FileRouteTypes {
     | '/produits'
     | '/stocks'
     | '/super-admin'
+    | '/ventes'
     | '/produits/$productId'
     | '/super-admin/abonnements'
     | '/super-admin/admins'
@@ -230,12 +251,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/caisse'
+    | '/comptabilite'
     | '/conformite'
     | '/dashboard'
     | '/employes'
     | '/parametres'
     | '/produits'
     | '/stocks'
+    | '/ventes'
     | '/produits/$productId'
     | '/super-admin/abonnements'
     | '/super-admin/admins'
@@ -251,6 +274,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/_authenticated/caisse'
+    | '/_authenticated/comptabilite'
     | '/_authenticated/conformite'
     | '/_authenticated/dashboard'
     | '/_authenticated/employes'
@@ -258,6 +282,7 @@ export interface FileRouteTypes {
     | '/_authenticated/produits'
     | '/_authenticated/stocks'
     | '/_authenticated/super-admin'
+    | '/_authenticated/ventes'
     | '/_authenticated/produits/$productId'
     | '/_authenticated/super-admin/abonnements'
     | '/_authenticated/super-admin/admins'
@@ -312,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/ventes': {
+      id: '/_authenticated/ventes'
+      path: '/ventes'
+      fullPath: '/ventes'
+      preLoaderRoute: typeof AuthenticatedVentesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/super-admin': {
       id: '/_authenticated/super-admin'
       path: '/super-admin'
@@ -359,6 +391,13 @@ declare module '@tanstack/react-router' {
       path: '/conformite'
       fullPath: '/conformite'
       preLoaderRoute: typeof AuthenticatedConformiteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/comptabilite': {
+      id: '/_authenticated/comptabilite'
+      path: '/comptabilite'
+      fullPath: '/comptabilite'
+      preLoaderRoute: typeof AuthenticatedComptabiliteRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/caisse': {
@@ -461,6 +500,7 @@ const AuthenticatedSuperAdminRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCaisseRoute: typeof AuthenticatedCaisseRoute
+  AuthenticatedComptabiliteRoute: typeof AuthenticatedComptabiliteRoute
   AuthenticatedConformiteRoute: typeof AuthenticatedConformiteRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEmployesRoute: typeof AuthenticatedEmployesRoute
@@ -468,10 +508,12 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRouteWithChildren
   AuthenticatedStocksRoute: typeof AuthenticatedStocksRoute
   AuthenticatedSuperAdminRoute: typeof AuthenticatedSuperAdminRouteWithChildren
+  AuthenticatedVentesRoute: typeof AuthenticatedVentesRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCaisseRoute: AuthenticatedCaisseRoute,
+  AuthenticatedComptabiliteRoute: AuthenticatedComptabiliteRoute,
   AuthenticatedConformiteRoute: AuthenticatedConformiteRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEmployesRoute: AuthenticatedEmployesRoute,
@@ -479,6 +521,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProduitsRoute: AuthenticatedProduitsRouteWithChildren,
   AuthenticatedStocksRoute: AuthenticatedStocksRoute,
   AuthenticatedSuperAdminRoute: AuthenticatedSuperAdminRouteWithChildren,
+  AuthenticatedVentesRoute: AuthenticatedVentesRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
