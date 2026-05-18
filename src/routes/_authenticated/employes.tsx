@@ -95,6 +95,30 @@ function EmployesPage() {
     onError: (e: any) => toast.error(e?.message ?? "Échec"),
   });
 
+  const [resetTarget, setResetTarget] = useState<null | { userId: string; name: string }>(null);
+  const [customPwd, setCustomPwd] = useState("");
+  const [resetResult, setResetResult] = useState<null | { password: string; name: string }>(null);
+
+  const resetMut = useMutation({
+    mutationFn: (v: { targetUserId: string; password?: string }) =>
+      fnReset({ data: { companyId: companyId!, targetUserId: v.targetUserId, password: v.password } }),
+    onSuccess: (res: any) => {
+      setResetResult({ password: res.password, name: resetTarget?.name ?? "" });
+      setResetTarget(null);
+      setCustomPwd("");
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Échec de la réinitialisation"),
+  });
+
+  const copyPassword = async (pwd: string) => {
+    try {
+      await navigator.clipboard.writeText(pwd);
+      toast.success("Mot de passe copié");
+    } catch {
+      toast.error("Impossible de copier");
+    }
+  };
+
   if (loadingCompany) return <PageSkeleton />;
   if (!companyId) {
     return (
