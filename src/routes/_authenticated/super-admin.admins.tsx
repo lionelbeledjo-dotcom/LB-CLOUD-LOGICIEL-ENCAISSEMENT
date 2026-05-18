@@ -22,9 +22,13 @@ export const Route = createFileRoute("/_authenticated/super-admin/admins")({
 
 type Row = { user_id: string; created_at: string; full_name?: string | null };
 
+const PAGE_SIZE = 10;
+
 function SuperAdminsPage() {
   const qc = useQueryClient();
   const [userId, setUserId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading } = useQuery({
     queryKey: ["super-admins-list"],
