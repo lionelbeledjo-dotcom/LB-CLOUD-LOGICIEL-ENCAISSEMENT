@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          company_id: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          metadata: Json
+          target_id: string | null
+          target_table: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          company_id: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          target_id?: string | null
+          target_table?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          target_id?: string | null
+          target_table?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address_line1: string | null
@@ -121,6 +168,136 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          city: string | null
+          company_id: string
+          country: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          full_name: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          phone: string | null
+          postal_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          company_id: string
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          city?: string | null
+          company_id?: string
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          barcode: string | null
+          category: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          purchase_price: number
+          sale_price: number
+          sku: string | null
+          stock_alert_threshold: number
+          stock_quantity: number
+          unit: string
+          updated_at: string
+          vat_rate: number
+        }
+        Insert: {
+          barcode?: string | null
+          category?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          purchase_price?: number
+          sale_price?: number
+          sku?: string | null
+          stock_alert_threshold?: number
+          stock_quantity?: number
+          unit?: string
+          updated_at?: string
+          vat_rate?: number
+        }
+        Update: {
+          barcode?: string | null
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          purchase_price?: number
+          sale_price?: number
+          sku?: string | null
+          stock_alert_threshold?: number
+          stock_quantity?: number
+          unit?: string
+          updated_at?: string
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -150,6 +327,148 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      sale_items: {
+        Row: {
+          company_id: string
+          created_at: string
+          discount_percent: number
+          id: string
+          line_total_ht: number
+          line_total_ttc: number
+          line_total_vat: number
+          product_id: string | null
+          product_name: string
+          quantity: number
+          sale_id: string
+          unit_price_ht: number
+          vat_rate: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          line_total_ht?: number
+          line_total_ttc?: number
+          line_total_vat?: number
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          sale_id: string
+          unit_price_ht?: number
+          vat_rate?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          line_total_ht?: number
+          line_total_ttc?: number
+          line_total_vat?: number
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          sale_id?: string
+          unit_price_ht?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          amount_change: number
+          amount_paid: number
+          cashier_id: string | null
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          id: string
+          invoice_number: string
+          notes: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"]
+          sold_at: string
+          status: Database["public"]["Enums"]["sale_status"]
+          total_ht: number
+          total_ttc: number
+          total_vat: number
+          updated_at: string
+        }
+        Insert: {
+          amount_change?: number
+          amount_paid?: number
+          cashier_id?: string | null
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          invoice_number: string
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          sold_at?: string
+          status?: Database["public"]["Enums"]["sale_status"]
+          total_ht?: number
+          total_ttc?: number
+          total_vat?: number
+          updated_at?: string
+        }
+        Update: {
+          amount_change?: number
+          amount_paid?: number
+          cashier_id?: string | null
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          invoice_number?: string
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"]
+          sold_at?: string
+          status?: Database["public"]["Enums"]["sale_status"]
+          total_ht?: number
+          total_ttc?: number
+          total_vat?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       super_admins: {
         Row: {
@@ -204,6 +523,14 @@ export type Database = {
         | "epicerie"
         | "restaurant"
         | "autre"
+      payment_method:
+        | "especes"
+        | "carte"
+        | "cheque"
+        | "virement"
+        | "ticket_restaurant"
+        | "autre"
+      sale_status: "en_cours" | "validee" | "annulee" | "remboursee"
       subscription_plan: "essai" | "standard" | "premium" | "entreprise"
     }
     CompositeTypes: {
@@ -348,6 +675,15 @@ export const Constants = {
         "restaurant",
         "autre",
       ],
+      payment_method: [
+        "especes",
+        "carte",
+        "cheque",
+        "virement",
+        "ticket_restaurant",
+        "autre",
+      ],
+      sale_status: ["en_cours", "validee", "annulee", "remboursee"],
       subscription_plan: ["essai", "standard", "premium", "entreprise"],
     },
   },
