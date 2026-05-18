@@ -69,7 +69,7 @@ function SuperAdminDashboardPage() {
   const tiles = [
     { to: "/super-admin", icon: Shield, label: "Vue d'ensemble", desc: "Statistiques globales Lb Cloud" },
     { to: "/super-admin/entreprises", icon: Building2, label: "Entreprises", desc: "Créer, suspendre, gérer toutes les entreprises" },
-    { to: "/super-admin/abonnements", icon: CreditCard, label: "Abonnements", desc: "Plans et facturation" },
+    { to: "/superadmin/abonnements", icon: CreditCard, label: "Abonnements", desc: "Plans, cycles et facturation" },
     { to: "/super-admin/admins", icon: KeyRound, label: "Administrateurs", desc: "Promotions et accès super admin" },
     { to: "/superadmin/mfa", icon: ShieldCheck, label: "MFA / Sécurité", desc: "Activer la double authentification" },
     { to: "/super-admin/logs", icon: ScrollText, label: "Journaux d'audit", desc: "Suivi complet des actions" },
