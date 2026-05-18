@@ -198,18 +198,35 @@ function JournalTab({ companyId }: { companyId: string }) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("sales_journal").select("*").eq("company_id", companyId)
-        .order("sequence_number", { ascending: false }).limit(200);
+        .order("sequence_number", { ascending: false }).limit(5000);
       if (error) throw error;
       return data;
     },
   });
 
+  const downloadCsv = () => {
+    if (!data?.length) { toast.error("Journal vide"); return; }
+    const headers = ["sequence_number","invoice_number","sold_at","total_ht","total_vat","total_ttc","previous_hash","current_hash"];
+    const rows = data.map(j => [
+      j.sequence_number, j.invoice_number, j.sold_at,
+      Number(j.total_ht).toFixed(2), Number(j.total_vat).toFixed(2), Number(j.total_ttc).toFixed(2),
+      j.previous_hash, j.current_hash,
+    ]);
+    downloadCSV(`journal_ventes_${new Date().toISOString().slice(0,10)}.csv`, headers, rows);
+    toast.success(`Journal exporté — ${data.length} entrées`);
+  };
+
   return (
     <div className="mt-6">
       <Card title="Journal des ventes (inaltérable)">
-        <p className="text-xs text-muted-foreground mb-4 flex items-center gap-2">
-          <ScrollText className="size-3" /> Chaînage cryptographique SHA-256, append-only.
-        </p>
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <p className="text-xs text-muted-foreground flex items-center gap-2">
+            <ScrollText className="size-3" /> Chaînage cryptographique SHA-256, append-only.
+          </p>
+          <Button size="sm" onClick={downloadCsv} disabled={isLoading || !data?.length}>
+            <FileDown className="size-4 mr-2" /> Télécharger (CSV)
+          </Button>
+        </div>
         {isLoading ? <Skeleton className="h-32" /> : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -219,7 +236,7 @@ function JournalTab({ companyId }: { companyId: string }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {data?.map(j => (
+                {data?.slice(0, 200).map(j => (
                   <tr key={j.id}>
                     <Td className="tabular-nums">{j.sequence_number}</Td>
                     <Td>{j.invoice_number}</Td>
@@ -230,6 +247,11 @@ function JournalTab({ companyId }: { companyId: string }) {
                 ))}
               </tbody>
             </table>
+            {data && data.length > 200 && (
+              <p className="text-[10px] text-muted-foreground mt-2">
+                Affichage des 200 plus récentes — le CSV contient les {data.length} entrées.
+              </p>
+            )}
           </div>
         )}
       </Card>
