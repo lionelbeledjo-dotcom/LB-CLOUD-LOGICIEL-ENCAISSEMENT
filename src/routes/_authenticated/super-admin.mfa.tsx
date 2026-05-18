@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/super-admin/mfa")({
-  component: SuperAdminMfa;
+  component: SuperAdminMfa,
 });
 
 type Factor = { id: string; status: string; friendly_name?: string };
