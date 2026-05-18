@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, Fragment } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, Minus, Trash2, Search, Receipt, ShoppingCart, AlertTriangle,
-  Lock, Unlock, Percent, History, XCircle, ScanBarcode,
+  Lock, Unlock, Percent, History, XCircle, ScanBarcode, ChevronDown, ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
