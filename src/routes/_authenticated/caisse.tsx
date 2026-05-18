@@ -65,6 +65,20 @@ function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
 
+type StockError = { product: string; requested: number; available: number };
+
+// Matches the message raised by the DB function `create_sale`:
+//   Stock insuffisant pour "NAME": demandé X / disponible Y.
+function parseStockError(msg: string): StockError | null {
+  const m = msg.match(/Stock insuffisant pour\s+"([^"]+)":\s*demandé\s+([\d.,]+)\s*\/\s*disponible\s+([\d.,]+)/i);
+  if (!m) return null;
+  return {
+    product: m[1],
+    requested: parseFloat(m[2].replace(",", ".")),
+    available: parseFloat(m[3].replace(",", ".")),
+  };
+}
+
 function CaissePage() {
   const { data: membership, isLoading: loadingCompany } = useActiveCompany();
   const companyId = membership?.company_id;
@@ -75,6 +89,7 @@ function CaissePage() {
   const [paymentMethod, setPaymentMethod] = useState("especes");
   const [amountPaid, setAmountPaid] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [stockError, setStockError] = useState<StockError | null>(null);
   const [lastInvoice, setLastInvoice] = useState<{
     invoice: string;
     totalTtc: number;
