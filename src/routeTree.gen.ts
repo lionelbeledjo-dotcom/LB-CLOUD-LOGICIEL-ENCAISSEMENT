@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
@@ -19,6 +20,11 @@ import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -48,6 +54,7 @@ const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
   '/caisse': typeof AuthenticatedCaisseRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -55,6 +62,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
   '/caisse': typeof AuthenticatedCaisseRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -64,6 +72,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -71,13 +80,26 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/caisse' | '/dashboard' | '/produits'
+  fullPaths:
+    | '/'
+    | '/confidentialite'
+    | '/login'
+    | '/caisse'
+    | '/dashboard'
+    | '/produits'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/caisse' | '/dashboard' | '/produits'
+  to:
+    | '/'
+    | '/confidentialite'
+    | '/login'
+    | '/caisse'
+    | '/dashboard'
+    | '/produits'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/confidentialite'
     | '/login'
     | '/_authenticated/caisse'
     | '/_authenticated/dashboard'
@@ -87,6 +109,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   LoginRoute: typeof LoginRoute
 }
 
@@ -97,6 +120,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -156,8 +186,19 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
