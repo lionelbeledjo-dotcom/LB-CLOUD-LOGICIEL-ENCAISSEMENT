@@ -76,6 +76,18 @@ export function AppSidebar() {
             />
           ))}
         </div>
+
+        {isSuperAdmin && (
+          <div className="pt-4">
+            <SectionLabel>Plateforme</SectionLabel>
+            <NavItem
+              to="/super-admin"
+              label="Super Admin"
+              Icon={Shield}
+              active={location.pathname.startsWith("/super-admin")}
+            />
+          </div>
+        )}
       </nav>
 
       <div className="p-4 mt-auto border-t border-border">
