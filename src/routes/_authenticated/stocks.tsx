@@ -61,8 +61,8 @@ type Movement = {
 };
 
 function StocksPage() {
-  const { activeCompany, isLoading } = useActiveCompany();
-  const companyId = activeCompany?.id;
+  const { data: membership, isLoading } = useActiveCompany();
+  const companyId = membership?.company_id;
 
   if (isLoading) {
     return <div className="p-6"><Skeleton className="h-96 w-full" /></div>;
