@@ -271,9 +271,17 @@ function EmployesPage() {
           members!.map((m: any) => (
             <div key={m.id}
               className="grid grid-cols-[2fr_2fr_1.2fr_1fr_auto] gap-4 px-5 py-4 border-b border-border last:border-0 items-center">
-              <div>
-                <div className="font-medium">{m.full_name ?? "Sans nom"}</div>
-                <div className="text-xs text-muted-foreground font-mono">{m.user_id.slice(0, 8)}…</div>
+              <div className="flex items-center gap-3 min-w-0">
+                <Avatar className="size-9 shrink-0">
+                  {m.avatar_url ? <AvatarImage src={m.avatar_url} alt={m.full_name ?? ""} /> : null}
+                  <AvatarFallback>
+                    {(m.full_name ?? m.email ?? "?").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{m.full_name ?? "Sans nom"}</div>
+                  <div className="text-xs text-muted-foreground font-mono">{m.user_id.slice(0, 8)}…</div>
+                </div>
               </div>
               <div className="text-sm space-y-1">
                 {m.email && <div className="flex items-center gap-1.5"><Mail className="size-3" />{m.email}</div>}
