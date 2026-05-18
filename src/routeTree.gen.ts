@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedVentesRouteImport } from './routes/_authenticated/ventes'
 import { Route as AuthenticatedSuperAdminRouteImport } from './routes/_authenticated/super-admin'
 import { Route as AuthenticatedStocksRouteImport } from './routes/_authenticated/stocks'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
@@ -53,6 +54,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedVentesRoute = AuthenticatedVentesRouteImport.update({
+  id: '/ventes',
+  path: '/ventes',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedSuperAdminRoute = AuthenticatedSuperAdminRouteImport.update({
   id: '/super-admin',
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
   '/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
+  '/ventes': typeof AuthenticatedVentesRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/parametres': typeof AuthenticatedParametresRoute
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
+  '/ventes': typeof AuthenticatedVentesRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/_authenticated/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/_authenticated/stocks': typeof AuthenticatedStocksRoute
   '/_authenticated/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
+  '/_authenticated/ventes': typeof AuthenticatedVentesRoute
   '/_authenticated/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/_authenticated/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/_authenticated/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/produits'
     | '/stocks'
     | '/super-admin'
+    | '/ventes'
     | '/produits/$productId'
     | '/super-admin/abonnements'
     | '/super-admin/admins'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/parametres'
     | '/produits'
     | '/stocks'
+    | '/ventes'
     | '/produits/$productId'
     | '/super-admin/abonnements'
     | '/super-admin/admins'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/_authenticated/produits'
     | '/_authenticated/stocks'
     | '/_authenticated/super-admin'
+    | '/_authenticated/ventes'
     | '/_authenticated/produits/$productId'
     | '/_authenticated/super-admin/abonnements'
     | '/_authenticated/super-admin/admins'
@@ -311,6 +323,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/ventes': {
+      id: '/_authenticated/ventes'
+      path: '/ventes'
+      fullPath: '/ventes'
+      preLoaderRoute: typeof AuthenticatedVentesRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/super-admin': {
       id: '/_authenticated/super-admin'
@@ -468,6 +487,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRouteWithChildren
   AuthenticatedStocksRoute: typeof AuthenticatedStocksRoute
   AuthenticatedSuperAdminRoute: typeof AuthenticatedSuperAdminRouteWithChildren
+  AuthenticatedVentesRoute: typeof AuthenticatedVentesRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -479,6 +499,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProduitsRoute: AuthenticatedProduitsRouteWithChildren,
   AuthenticatedStocksRoute: AuthenticatedStocksRoute,
   AuthenticatedSuperAdminRoute: AuthenticatedSuperAdminRouteWithChildren,
+  AuthenticatedVentesRoute: AuthenticatedVentesRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -495,3 +516,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
