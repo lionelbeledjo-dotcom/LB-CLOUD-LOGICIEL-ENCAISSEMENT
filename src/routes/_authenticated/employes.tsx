@@ -41,6 +41,7 @@ function EmployesPage() {
   const fnInvite = useServerFn(inviteEmploye);
   const fnRole = useServerFn(updateEmployeRole);
   const fnActive = useServerFn(setEmployeActive);
+  const fnReset = useServerFn(resetEmployePassword);
 
   const companyId = company?.company_id;
   const { data: members, isLoading } = useQuery({
