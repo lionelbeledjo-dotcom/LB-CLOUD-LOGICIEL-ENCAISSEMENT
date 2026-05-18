@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SuperadminMfaRouteImport } from './routes/superadmin.mfa'
 import { Route as SuperadminLoginRouteImport } from './routes/superadmin.login'
 import { Route as SuperadminDashboardRouteImport } from './routes/superadmin.dashboard'
 import { Route as AuthenticatedVentesRouteImport } from './routes/_authenticated/ventes'
@@ -56,6 +57,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperadminMfaRoute = SuperadminMfaRouteImport.update({
+  id: '/superadmin/mfa',
+  path: '/superadmin/mfa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuperadminLoginRoute = SuperadminLoginRouteImport.update({
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/ventes': typeof AuthenticatedVentesRoute
   '/superadmin/dashboard': typeof SuperadminDashboardRoute
   '/superadmin/login': typeof SuperadminLoginRoute
+  '/superadmin/mfa': typeof SuperadminMfaRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/ventes': typeof AuthenticatedVentesRoute
   '/superadmin/dashboard': typeof SuperadminDashboardRoute
   '/superadmin/login': typeof SuperadminLoginRoute
+  '/superadmin/mfa': typeof SuperadminMfaRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/_authenticated/ventes': typeof AuthenticatedVentesRoute
   '/superadmin/dashboard': typeof SuperadminDashboardRoute
   '/superadmin/login': typeof SuperadminLoginRoute
+  '/superadmin/mfa': typeof SuperadminMfaRoute
   '/_authenticated/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
   '/_authenticated/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
   '/_authenticated/super-admin/admins': typeof AuthenticatedSuperAdminAdminsRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/ventes'
     | '/superadmin/dashboard'
     | '/superadmin/login'
+    | '/superadmin/mfa'
     | '/produits/$productId'
     | '/super-admin/abonnements'
     | '/super-admin/admins'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/ventes'
     | '/superadmin/dashboard'
     | '/superadmin/login'
+    | '/superadmin/mfa'
     | '/produits/$productId'
     | '/super-admin/abonnements'
     | '/super-admin/admins'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ventes'
     | '/superadmin/dashboard'
     | '/superadmin/login'
+    | '/superadmin/mfa'
     | '/_authenticated/produits/$productId'
     | '/_authenticated/super-admin/abonnements'
     | '/_authenticated/super-admin/admins'
@@ -324,6 +336,7 @@ export interface RootRouteChildren {
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   SuperadminDashboardRoute: typeof SuperadminDashboardRoute
   SuperadminLoginRoute: typeof SuperadminLoginRoute
+  SuperadminMfaRoute: typeof SuperadminMfaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -361,6 +374,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/superadmin/mfa': {
+      id: '/superadmin/mfa'
+      path: '/superadmin/mfa'
+      fullPath: '/superadmin/mfa'
+      preLoaderRoute: typeof SuperadminMfaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/superadmin/login': {
@@ -576,7 +596,18 @@ const rootRouteChildren: RootRouteChildren = {
   MentionsLegalesRoute: MentionsLegalesRoute,
   SuperadminDashboardRoute: SuperadminDashboardRoute,
   SuperadminLoginRoute: SuperadminLoginRoute,
+  SuperadminMfaRoute: SuperadminMfaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
