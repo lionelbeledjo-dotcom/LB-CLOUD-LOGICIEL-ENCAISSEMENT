@@ -305,6 +305,8 @@ function MovementTab({
   const [supplierId, setSupplierId] = useState<string>("");
   const [newSupplierOpen, setNewSupplierOpen] = useState(false);
   const [newSupplierName, setNewSupplierName] = useState("");
+  const [lotNumber, setLotNumber] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
   const [search, setSearch] = useState("");
 
   const { data: products } = useQuery({
