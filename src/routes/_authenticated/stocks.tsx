@@ -559,7 +559,7 @@ type EntryLine = {
 function MultiEntryTab({ companyId }: { companyId: string }) {
   const qc = useQueryClient();
   const [lines, setLines] = useState<EntryLine[]>([
-    { key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "" },
+    { key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "", lot_number: "", expiry_date: "" },
   ]);
   const [supplierId, setSupplierId] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
@@ -623,7 +623,7 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
   const removeLine = (key: string) =>
     setLines((prev) => (prev.length > 1 ? prev.filter((l) => l.key !== key) : prev));
   const addLine = () =>
-    setLines((prev) => [...prev, { key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "" }]);
+    setLines((prev) => [...prev, { key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "", lot_number: "", expiry_date: "" }]);
 
   const onPickProduct = (key: string, pid: string) => {
     const p = products?.find((x) => x.id === pid);
@@ -678,7 +678,7 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
     onSuccess: (res) => {
       if (res.ok > 0) {
         toast.success(`${res.ok} ligne(s) enregistrée(s)`);
-        setLines([{ key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "" }]);
+        setLines([{ key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "", lot_number: "", expiry_date: "" }]);
         setInvoiceNumber(""); setReference(""); setReason("");
         qc.invalidateQueries({ queryKey: ["products", companyId, "active-min"] });
         qc.invalidateQueries({ queryKey: ["stock-movements", companyId] });
