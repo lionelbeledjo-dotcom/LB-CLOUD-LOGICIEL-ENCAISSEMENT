@@ -8,6 +8,7 @@ import {
   Users,
   Calculator,
   Settings,
+  ShieldCheck,
 } from "lucide-react";
 import { LbLogo } from "./LbLogo";
 import { useAuth } from "@/hooks/use-auth";
