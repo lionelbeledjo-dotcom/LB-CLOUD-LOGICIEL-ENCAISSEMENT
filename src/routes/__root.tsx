@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
 import { AuthProvider } from "@/hooks/use-auth";
-import { CookieConsent } from "@/components/cookie-consent";
 
 import appCss from "../styles.css?url";
 
@@ -75,10 +74,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Lb Cloud — Encaissement & Gestion pour commerces" },
       { name: "description", content: "Lb Cloud : solution SaaS française d'encaissement et de gestion pour boulangeries, supermarchés, tabacs et restaurants. Multi-tenant, sécurisé, conforme NF525 & RGPD." },
       { name: "author", content: "Lb Cloud" },
-      { property: "og:title", content: "Lb Cloud — Encaissement & Gestion" },
-      { property: "og:description", content: "Solution SaaS française pour commerces de proximité." },
+      { property: "og:title", content: "Lb Cloud — Encaissement & Gestion pour commerces" },
+      { property: "og:description", content: "Lb Cloud : solution SaaS française d'encaissement et de gestion pour boulangeries, supermarchés, tabacs et restaurants. Multi-tenant, sécurisé, conforme NF525 & RGPD." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Lb Cloud — Encaissement & Gestion pour commerces" },
+      { name: "twitter:description", content: "Lb Cloud : solution SaaS française d'encaissement et de gestion pour boulangeries, supermarchés, tabacs et restaurants. Multi-tenant, sécurisé, conforme NF525 & RGPD." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5fb48f68-83e4-4590-be2d-24e12147d865/id-preview-c992ad5d--09bda121-13de-4921-88b8-252199a8f27c.lovable.app-1779136380603.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5fb48f68-83e4-4590-be2d-24e12147d865/id-preview-c992ad5d--09bda121-13de-4921-88b8-252199a8f27c.lovable.app-1779136380603.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -115,7 +118,6 @@ function RootComponent() {
       <AuthProvider>
         <Outlet />
         <Toaster theme="dark" position="top-right" />
-        <CookieConsent />
       </AuthProvider>
     </QueryClientProvider>
   );
