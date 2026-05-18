@@ -715,8 +715,10 @@ export type Database = {
         Row: {
           company_id: string
           created_at: string
+          expiry_date: string | null
           id: string
           invoice_number: string | null
+          lot_number: string | null
           movement_type: string
           product_id: string
           product_name: string
@@ -734,8 +736,10 @@ export type Database = {
         Insert: {
           company_id: string
           created_at?: string
+          expiry_date?: string | null
           id?: string
           invoice_number?: string | null
+          lot_number?: string | null
           movement_type: string
           product_id: string
           product_name: string
@@ -753,8 +757,10 @@ export type Database = {
         Update: {
           company_id?: string
           created_at?: string
+          expiry_date?: string | null
           id?: string
           invoice_number?: string | null
+          lot_number?: string | null
           movement_type?: string
           product_id?: string
           product_name?: string
@@ -928,6 +934,22 @@ export type Database = {
         | {
             Args: {
               _invoice_number?: string
+              _movement_type: string
+              _product_id: string
+              _quantity: number
+              _reason?: string
+              _reference?: string
+              _supplier_id?: string
+              _target_quantity?: number
+              _unit_cost?: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _expiry_date?: string
+              _invoice_number?: string
+              _lot_number?: string
               _movement_type: string
               _product_id: string
               _quantity: number
