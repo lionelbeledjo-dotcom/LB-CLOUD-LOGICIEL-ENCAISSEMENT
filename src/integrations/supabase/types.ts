@@ -67,6 +67,54 @@ export type Database = {
           },
         ]
       }
+      cash_sessions: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closing_amount: number | null
+          company_id: string
+          created_at: string
+          expected_cash: number | null
+          id: string
+          notes: string | null
+          opened_at: string
+          opened_by: string
+          opening_amount: number
+          status: string
+          variance: number | null
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_amount?: number | null
+          company_id: string
+          created_at?: string
+          expected_cash?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by: string
+          opening_amount?: number
+          status?: string
+          variance?: number | null
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_amount?: number | null
+          company_id?: string
+          created_at?: string
+          expected_cash?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opened_by?: string
+          opening_amount?: number
+          status?: string
+          variance?: number | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address_line1: string | null
@@ -482,6 +530,7 @@ export type Database = {
           payment_method: Database["public"]["Enums"]["payment_method"]
           previous_hash: string | null
           sequence_number: number | null
+          session_id: string | null
           signed_at: string | null
           sold_at: string
           status: Database["public"]["Enums"]["sale_status"]
@@ -507,6 +556,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           previous_hash?: string | null
           sequence_number?: number | null
+          session_id?: string | null
           signed_at?: string | null
           sold_at?: string
           status?: Database["public"]["Enums"]["sale_status"]
@@ -532,6 +582,7 @@ export type Database = {
           payment_method?: Database["public"]["Enums"]["payment_method"]
           previous_hash?: string | null
           sequence_number?: number | null
+          session_id?: string | null
           signed_at?: string | null
           sold_at?: string
           status?: Database["public"]["Enums"]["sale_status"]
@@ -657,6 +708,14 @@ export type Database = {
     }
     Functions: {
       anonymize_customer: { Args: { _customer_id: string }; Returns: undefined }
+      cancel_sale: {
+        Args: { _reason: string; _sale_id: string }
+        Returns: string
+      }
+      close_cash_session: {
+        Args: { _closing_amount: number; _company_id: string; _notes: string }
+        Returns: string
+      }
       create_sale: {
         Args: {
           _amount_paid: number
@@ -690,6 +749,10 @@ export type Database = {
         Returns: undefined
       }
       next_invoice_number: { Args: { _company_id: string }; Returns: string }
+      open_cash_session: {
+        Args: { _company_id: string; _opening_amount: number }
+        Returns: string
+      }
     }
     Enums: {
       app_role:
