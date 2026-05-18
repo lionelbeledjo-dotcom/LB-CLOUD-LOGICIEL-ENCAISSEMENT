@@ -122,6 +122,59 @@ function EmployesPage() {
     }
   };
 
+  // Edit profile state
+  const [editTarget, setEditTarget] = useState<null | {
+    userId: string; fullName: string; phone: string; avatarUrl: string | null;
+  }>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const updateMut = useMutation({
+    mutationFn: (v: { targetUserId: string; fullName: string; phone: string; avatarUrl: string | null }) =>
+      fnUpdate({
+        data: {
+          companyId: companyId!,
+          targetUserId: v.targetUserId,
+          fullName: v.fullName,
+          phone: v.phone || null,
+          avatarUrl: v.avatarUrl,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Profil mis à jour");
+      setEditTarget(null);
+      qc.invalidateQueries({ queryKey: ["employes", companyId] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Échec de la mise à jour"),
+  });
+
+  const onPickAvatar = async (file: File) => {
+    if (!editTarget) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Fichier image requis"); return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image trop volumineuse (max 5 Mo)"); return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${editTarget.userId}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, {
+        cacheControl: "3600", upsert: true, contentType: file.type,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setEditTarget({ ...editTarget, avatarUrl: data.publicUrl });
+      toast.success("Avatar téléversé");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Échec du téléversement");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   if (loadingCompany) return <PageSkeleton />;
   if (!companyId) {
     return (
