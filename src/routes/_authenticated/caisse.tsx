@@ -856,6 +856,10 @@ function JournalTab({ companyId }: { companyId: string }) {
     <>
       <SessionBar companyId={companyId} />
 
+      <VarianceLogsPanel companyId={companyId} />
+
+
+
       {/* Filtres */}
       <div className="mb-4 bg-surface/60 ring-1 ring-border rounded-xl p-4 flex flex-wrap items-end gap-3">
         <div>
@@ -1080,6 +1084,113 @@ function Row({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between text-sm">
       <span className="text-muted-foreground">{label}</span>
       <span className="text-foreground tabular-nums">{value}</span>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────── Journal des écarts de caisse
+type VarianceLog = {
+  id: string;
+  session_id: string;
+  user_id: string | null;
+  expected_amount: number;
+  counted_amount: number;
+  variance: number;
+  abs_variance: number;
+  severity: "none" | "minor" | "major";
+  threshold_minor: number;
+  threshold_major: number;
+  justification: string | null;
+  occurred_at: string;
+};
+
+function VarianceLogsPanel({ companyId }: { companyId: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["cash-variance-logs", companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cash_variance_logs" as never)
+        .select("*")
+        .eq("company_id", companyId)
+        .order("occurred_at", { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return (data ?? []) as unknown as VarianceLog[];
+    },
+    refetchInterval: 30000,
+  });
+
+  if (isLoading) {
+    return <Skeleton className="mb-4 h-24 w-full" />;
+  }
+  if (!data || data.length === 0) {
+    return (
+      <div className="mb-4 rounded-xl ring-1 ring-border bg-surface/60 px-4 py-3 text-sm text-muted-foreground">
+        Aucun écart de clôture enregistré pour le moment.
+      </div>
+    );
+  }
+
+  const sevStyle = (s: VarianceLog["severity"]) =>
+    s === "major" ? "text-red-300 bg-red-500/10 ring-red-500/30"
+    : s === "minor" ? "text-amber-300 bg-amber-500/10 ring-amber-500/30"
+    : "text-emerald-300 bg-emerald-500/10 ring-emerald-500/30";
+  const sevLabel = (s: VarianceLog["severity"]) =>
+    s === "major" ? "Significatif" : s === "minor" ? "Mineur" : "Aucun";
+
+  return (
+    <div className="mb-4 rounded-xl ring-1 ring-border bg-surface/60 overflow-hidden">
+      <div className="px-4 py-3 border-b border-border flex items-center gap-2">
+        <AlertTriangle className="size-4 text-amber-400" />
+        <h3 className="text-sm font-semibold">Journal des écarts de clôture</h3>
+        <span className="text-xs text-muted-foreground ml-auto">20 dernières clôtures</span>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-[10px] uppercase tracking-wider text-muted-foreground bg-surface/40">
+            <tr>
+              <th className="text-left px-3 py-2">Date</th>
+              <th className="text-left px-3 py-2">Sévérité</th>
+              <th className="text-right px-3 py-2">Théorique</th>
+              <th className="text-right px-3 py-2">Compté</th>
+              <th className="text-right px-3 py-2">Écart</th>
+              <th className="text-left px-3 py-2">Justification</th>
+              <th className="text-left px-3 py-2">Utilisateur</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((l) => (
+              <tr key={l.id} className="border-t border-border/60">
+                <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                  {new Date(l.occurred_at).toLocaleString("fr-FR")}
+                </td>
+                <td className="px-3 py-2">
+                  <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs ring-1 ${sevStyle(l.severity)}`}>
+                    {sevLabel(l.severity)}
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-right tabular-nums">{eur(Number(l.expected_amount))}</td>
+                <td className="px-3 py-2 text-right tabular-nums">{eur(Number(l.counted_amount))}</td>
+                <td className={`px-3 py-2 text-right tabular-nums font-semibold ${
+                  l.severity === "none" ? "text-emerald-400"
+                  : l.severity === "minor" ? "text-amber-400" : "text-red-400"
+                }`}>
+                  {Number(l.variance) > 0 ? "+" : ""}{eur(Number(l.variance))}
+                </td>
+                <td className="px-3 py-2 text-muted-foreground max-w-xs truncate" title={l.justification ?? ""}>
+                  {l.justification || <span className="opacity-50">—</span>}
+                </td>
+                <td className="px-3 py-2 text-muted-foreground text-xs font-mono">
+                  {l.user_id ? l.user_id.slice(0, 8) : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="px-4 py-2 border-t border-border bg-surface/40 text-[11px] text-muted-foreground">
+        Seuils appliqués : mineur ≥ {eur(Number(data[0].threshold_minor))} · significatif ≥ {eur(Number(data[0].threshold_major))}
+      </div>
     </div>
   );
 }
