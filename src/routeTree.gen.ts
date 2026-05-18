@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SuperadminMfaRouteImport } from './routes/superadmin.mfa'
 import { Route as SuperadminLoginRouteImport } from './routes/superadmin.login'
 import { Route as SuperadminDashboardRouteImport } from './routes/superadmin.dashboard'
+import { Route as SuperadminAbonnementsRouteImport } from './routes/superadmin.abonnements'
 import { Route as AuthenticatedVentesRouteImport } from './routes/_authenticated/ventes'
 import { Route as AuthenticatedSuperAdminRouteImport } from './routes/_authenticated/super-admin'
 import { Route as AuthenticatedStocksRouteImport } from './routes/_authenticated/stocks'
@@ -72,6 +73,11 @@ const SuperadminLoginRoute = SuperadminLoginRouteImport.update({
 const SuperadminDashboardRoute = SuperadminDashboardRouteImport.update({
   id: '/superadmin/dashboard',
   path: '/superadmin/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuperadminAbonnementsRoute = SuperadminAbonnementsRouteImport.update({
+  id: '/superadmin/abonnements',
+  path: '/superadmin/abonnements',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedVentesRoute = AuthenticatedVentesRouteImport.update({
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/stocks': typeof AuthenticatedStocksRoute
   '/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
   '/ventes': typeof AuthenticatedVentesRoute
+  '/superadmin/abonnements': typeof SuperadminAbonnementsRoute
   '/superadmin/dashboard': typeof SuperadminDashboardRoute
   '/superadmin/login': typeof SuperadminLoginRoute
   '/superadmin/mfa': typeof SuperadminMfaRoute
@@ -208,6 +215,7 @@ export interface FileRoutesByTo {
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
   '/ventes': typeof AuthenticatedVentesRoute
+  '/superadmin/abonnements': typeof SuperadminAbonnementsRoute
   '/superadmin/dashboard': typeof SuperadminDashboardRoute
   '/superadmin/login': typeof SuperadminLoginRoute
   '/superadmin/mfa': typeof SuperadminMfaRoute
@@ -236,6 +244,7 @@ export interface FileRoutesById {
   '/_authenticated/stocks': typeof AuthenticatedStocksRoute
   '/_authenticated/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
   '/_authenticated/ventes': typeof AuthenticatedVentesRoute
+  '/superadmin/abonnements': typeof SuperadminAbonnementsRoute
   '/superadmin/dashboard': typeof SuperadminDashboardRoute
   '/superadmin/login': typeof SuperadminLoginRoute
   '/superadmin/mfa': typeof SuperadminMfaRoute
@@ -264,6 +273,7 @@ export interface FileRouteTypes {
     | '/stocks'
     | '/super-admin'
     | '/ventes'
+    | '/superadmin/abonnements'
     | '/superadmin/dashboard'
     | '/superadmin/login'
     | '/superadmin/mfa'
@@ -289,6 +299,7 @@ export interface FileRouteTypes {
     | '/produits'
     | '/stocks'
     | '/ventes'
+    | '/superadmin/abonnements'
     | '/superadmin/dashboard'
     | '/superadmin/login'
     | '/superadmin/mfa'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/_authenticated/stocks'
     | '/_authenticated/super-admin'
     | '/_authenticated/ventes'
+    | '/superadmin/abonnements'
     | '/superadmin/dashboard'
     | '/superadmin/login'
     | '/superadmin/mfa'
@@ -334,6 +346,7 @@ export interface RootRouteChildren {
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   LoginRoute: typeof LoginRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
+  SuperadminAbonnementsRoute: typeof SuperadminAbonnementsRoute
   SuperadminDashboardRoute: typeof SuperadminDashboardRoute
   SuperadminLoginRoute: typeof SuperadminLoginRoute
   SuperadminMfaRoute: typeof SuperadminMfaRoute
@@ -395,6 +408,13 @@ declare module '@tanstack/react-router' {
       path: '/superadmin/dashboard'
       fullPath: '/superadmin/dashboard'
       preLoaderRoute: typeof SuperadminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/superadmin/abonnements': {
+      id: '/superadmin/abonnements'
+      path: '/superadmin/abonnements'
+      fullPath: '/superadmin/abonnements'
+      preLoaderRoute: typeof SuperadminAbonnementsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/ventes': {
@@ -594,6 +614,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfidentialiteRoute: ConfidentialiteRoute,
   LoginRoute: LoginRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
+  SuperadminAbonnementsRoute: SuperadminAbonnementsRoute,
   SuperadminDashboardRoute: SuperadminDashboardRoute,
   SuperadminLoginRoute: SuperadminLoginRoute,
   SuperadminMfaRoute: SuperadminMfaRoute,
