@@ -286,7 +286,7 @@ function ProductsPage() {
                             className="inline-flex items-center justify-center size-9 rounded-md hover:bg-surface text-xs text-muted-foreground hover:text-foreground"
                             title="Historique des mouvements"
                           >
-                            <History className="size-4" />
+                            <HistoryIcon className="size-4" />
                           </Link>
                           <Button
                             size="icon"
