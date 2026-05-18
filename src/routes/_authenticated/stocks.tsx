@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Boxes, ArrowDownToLine, ArrowUpFromLine, ClipboardList, AlertTriangle,
-  History, TrendingDown, TrendingUp, Search, Package,
+  History, TrendingDown, TrendingUp, Search, Package, Plus, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
