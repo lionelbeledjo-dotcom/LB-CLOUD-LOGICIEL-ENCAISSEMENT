@@ -386,6 +386,8 @@ function MovementTab({
         _target_quantity: null,
         _supplier_id: kind === "entree" && supplierId ? supplierId : null,
         _invoice_number: kind === "entree" && invoiceNumber ? invoiceNumber : null,
+        _lot_number: lotNumber.trim() || null,
+        _expiry_date: expiryDate || null,
       });
       if (error) throw error;
     },
@@ -393,6 +395,7 @@ function MovementTab({
       toast.success(kind === "entree" ? "Entrée enregistrée" : "Sortie enregistrée");
       setQuantity(""); setUnitCost(""); setReason(""); setReference("");
       setInvoiceNumber(""); setSupplierId("");
+      setLotNumber(""); setExpiryDate("");
       qc.invalidateQueries({ queryKey: ["products", companyId, "active-min"] });
       qc.invalidateQueries({ queryKey: ["stock-movements", companyId] });
       qc.invalidateQueries({ queryKey: ["stock-kpis", companyId] });
