@@ -1,9 +1,11 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Users, UserPlus, Shield, Power, PowerOff, Mail, Phone, KeyRound, Copy } from "lucide-react";
+import { Users, UserPlus, Shield, Power, PowerOff, Mail, Phone, KeyRound, Copy, Pencil, Upload, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useActiveCompany } from "@/hooks/use-company";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
-  listEmployes, inviteEmploye, updateEmployeRole, setEmployeActive, resetEmployePassword,
+  listEmployes, inviteEmploye, updateEmployeRole, setEmployeActive, resetEmployePassword, updateEmployeProfile,
 } from "@/lib/employes.functions";
 
 export const Route = createFileRoute("/_authenticated/employes")({
@@ -42,6 +44,7 @@ function EmployesPage() {
   const fnRole = useServerFn(updateEmployeRole);
   const fnActive = useServerFn(setEmployeActive);
   const fnReset = useServerFn(resetEmployePassword);
+  const fnUpdate = useServerFn(updateEmployeProfile);
 
   const companyId = company?.company_id;
   const { data: members, isLoading } = useQuery({
@@ -116,6 +119,59 @@ function EmployesPage() {
       toast.success("Mot de passe copié");
     } catch {
       toast.error("Impossible de copier");
+    }
+  };
+
+  // Edit profile state
+  const [editTarget, setEditTarget] = useState<null | {
+    userId: string; fullName: string; phone: string; avatarUrl: string | null;
+  }>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const updateMut = useMutation({
+    mutationFn: (v: { targetUserId: string; fullName: string; phone: string; avatarUrl: string | null }) =>
+      fnUpdate({
+        data: {
+          companyId: companyId!,
+          targetUserId: v.targetUserId,
+          fullName: v.fullName,
+          phone: v.phone || null,
+          avatarUrl: v.avatarUrl,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Profil mis à jour");
+      setEditTarget(null);
+      qc.invalidateQueries({ queryKey: ["employes", companyId] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Échec de la mise à jour"),
+  });
+
+  const onPickAvatar = async (file: File) => {
+    if (!editTarget) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Fichier image requis"); return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image trop volumineuse (max 5 Mo)"); return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${editTarget.userId}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, {
+        cacheControl: "3600", upsert: true, contentType: file.type,
+      });
+      if (error) throw error;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setEditTarget({ ...editTarget, avatarUrl: data.publicUrl });
+      toast.success("Avatar téléversé");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Échec du téléversement");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
@@ -215,9 +271,17 @@ function EmployesPage() {
           members!.map((m: any) => (
             <div key={m.id}
               className="grid grid-cols-[2fr_2fr_1.2fr_1fr_auto] gap-4 px-5 py-4 border-b border-border last:border-0 items-center">
-              <div>
-                <div className="font-medium">{m.full_name ?? "Sans nom"}</div>
-                <div className="text-xs text-muted-foreground font-mono">{m.user_id.slice(0, 8)}…</div>
+              <div className="flex items-center gap-3 min-w-0">
+                <Avatar className="size-9 shrink-0">
+                  {m.avatar_url ? <AvatarImage src={m.avatar_url} alt={m.full_name ?? ""} /> : null}
+                  <AvatarFallback>
+                    {(m.full_name ?? m.email ?? "?").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="font-medium truncate">{m.full_name ?? "Sans nom"}</div>
+                  <div className="text-xs text-muted-foreground font-mono">{m.user_id.slice(0, 8)}…</div>
+                </div>
               </div>
               <div className="text-sm space-y-1">
                 {m.email && <div className="flex items-center gap-1.5"><Mail className="size-3" />{m.email}</div>}
@@ -244,6 +308,18 @@ function EmployesPage() {
                 )}
               </div>
               <div className="text-right flex items-center justify-end gap-1">
+                <Button
+                  variant="ghost" size="sm"
+                  onClick={() => setEditTarget({
+                    userId: m.user_id,
+                    fullName: m.full_name ?? "",
+                    phone: m.phone ?? "",
+                    avatarUrl: m.avatar_url ?? null,
+                  })}
+                  title="Modifier le profil"
+                >
+                  <Pencil className="size-4" />
+                </Button>
                 <Button
                   variant="ghost" size="sm"
                   onClick={() => setResetTarget({ userId: m.user_id, name: m.full_name ?? m.email ?? "cet utilisateur" })}
@@ -313,6 +389,89 @@ function EmployesPage() {
           </div>
           <DialogFooter>
             <Button onClick={() => setResetResult(null)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit profile dialog */}
+      <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier le profil</DialogTitle>
+            <DialogDescription>
+              Mettez à jour le nom, le téléphone et l'avatar de l'employé.
+            </DialogDescription>
+          </DialogHeader>
+          {editTarget && (
+            <div className="space-y-4 py-2">
+              <div className="flex items-center gap-4">
+                <Avatar className="size-16">
+                  {editTarget.avatarUrl ? <AvatarImage src={editTarget.avatarUrl} alt="" /> : null}
+                  <AvatarFallback>
+                    {(editTarget.fullName || "?").slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={fileRef} type="file" accept="image/*" hidden
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) onPickAvatar(f);
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button" variant="outline" size="sm"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      <Upload className="size-4 mr-1.5" />
+                      {uploading ? "Téléversement…" : "Changer"}
+                    </Button>
+                    {editTarget.avatarUrl && (
+                      <Button
+                        type="button" variant="ghost" size="sm"
+                        onClick={() => setEditTarget({ ...editTarget, avatarUrl: null })}
+                        disabled={uploading}
+                      >
+                        <X className="size-4 mr-1.5" />Retirer
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">PNG/JPG, max 5 Mo.</p>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-fn">Nom complet</Label>
+                <Input
+                  id="edit-fn" value={editTarget.fullName}
+                  onChange={(e) => setEditTarget({ ...editTarget, fullName: e.target.value })}
+                  maxLength={120}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-ph">Téléphone</Label>
+                <Input
+                  id="edit-ph" value={editTarget.phone}
+                  onChange={(e) => setEditTarget({ ...editTarget, phone: e.target.value })}
+                  placeholder="+33 6 12 34 56 78" maxLength={40}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditTarget(null)}>Annuler</Button>
+            <Button
+              onClick={() => editTarget && updateMut.mutate({
+                targetUserId: editTarget.userId,
+                fullName: editTarget.fullName.trim(),
+                phone: editTarget.phone.trim(),
+                avatarUrl: editTarget.avatarUrl,
+              })}
+              disabled={!editTarget?.fullName.trim() || updateMut.isPending || uploading}
+            >
+              {updateMut.isPending ? "Enregistrement…" : "Enregistrer"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
