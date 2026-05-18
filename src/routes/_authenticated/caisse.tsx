@@ -244,8 +244,20 @@ function SessionBar({ companyId }: { companyId: string }) {
             return (
               <div className="space-y-3">
                 <div>
-                  <Label>Espèces comptées (€)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Espèces comptées (€)</Label>
+                    <button
+                      type="button"
+                      onClick={() => setClosing(expected.toFixed(2))}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Pré-remplir ({eur(expected)})
+                    </button>
+                  </div>
                   <Input type="number" step="0.01" min="0" value={closing} onChange={(e) => setClosing(e.target.value)} />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Théorique: fonds {eur(Number(session?.opening_amount ?? 0))} + ventes espèces {eur(cashToday ?? 0)}
+                  </p>
                 </div>
                 {hasInput && (
                   <div className={`rounded-lg ring-1 px-3 py-2 text-sm flex items-start gap-2 ${
