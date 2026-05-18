@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
-  listEmployes, inviteEmploye, updateEmployeRole, setEmployeActive, resetEmployePassword,
+  listEmployes, inviteEmploye, updateEmployeRole, setEmployeActive, resetEmployePassword, updateEmployeProfile,
 } from "@/lib/employes.functions";
 
 export const Route = createFileRoute("/_authenticated/employes")({
