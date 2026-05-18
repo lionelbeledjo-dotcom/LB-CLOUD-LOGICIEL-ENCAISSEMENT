@@ -16,6 +16,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
 
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
@@ -52,6 +53,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedConformiteRoute = AuthenticatedConformiteRouteImport.update({
+  id: '/conformite',
+  path: '/conformite',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
   id: '/caisse',
   path: '/caisse',
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
+  '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produits': typeof AuthenticatedProduitsRoute
 }
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
+  '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produits': typeof AuthenticatedProduitsRoute
 }
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
+  '/_authenticated/conformite': typeof AuthenticatedConformiteRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/produits': typeof AuthenticatedProduitsRoute
 }
@@ -95,6 +104,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/caisse'
+    | '/conformite'
     | '/dashboard'
     | '/produits'
   fileRoutesByTo: FileRoutesByTo
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/caisse'
+    | '/conformite'
     | '/dashboard'
     | '/produits'
   id:
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/_authenticated/caisse'
+    | '/_authenticated/conformite'
     | '/_authenticated/dashboard'
     | '/_authenticated/produits'
   fileRoutesById: FileRoutesById
@@ -177,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/conformite': {
+      id: '/_authenticated/conformite'
+      path: '/conformite'
+      fullPath: '/conformite'
+      preLoaderRoute: typeof AuthenticatedConformiteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/caisse': {
       id: '/_authenticated/caisse'
       path: '/caisse'
@@ -189,12 +208,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCaisseRoute: typeof AuthenticatedCaisseRoute
+  AuthenticatedConformiteRoute: typeof AuthenticatedConformiteRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCaisseRoute: AuthenticatedCaisseRoute,
+  AuthenticatedConformiteRoute: AuthenticatedConformiteRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProduitsRoute: AuthenticatedProduitsRoute,
 }
@@ -213,3 +234,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
