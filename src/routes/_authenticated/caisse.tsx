@@ -856,6 +856,10 @@ function JournalTab({ companyId }: { companyId: string }) {
     <>
       <SessionBar companyId={companyId} />
 
+      <VarianceLogsPanel companyId={companyId} />
+
+
+
       {/* Filtres */}
       <div className="mb-4 bg-surface/60 ring-1 ring-border rounded-xl p-4 flex flex-wrap items-end gap-3">
         <div>
