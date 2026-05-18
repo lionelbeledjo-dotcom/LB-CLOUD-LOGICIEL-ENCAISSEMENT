@@ -103,6 +103,7 @@ function SessionBar({ companyId }: { companyId: string }) {
   const [opening, setOpening] = useState("0");
   const [closing, setClosing] = useState("");
   const [notes, setNotes] = useState("");
+  const [ackVariance, setAckVariance] = useState(false);
 
   const { data: session } = useQuery({
     queryKey: ["cash-session", companyId],
