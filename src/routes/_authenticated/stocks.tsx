@@ -643,12 +643,15 @@ function MultiEntryTab({ companyId }: { companyId: string }) {
       const valid = lines.filter((l) => l.product_id && parseFloat(l.quantity) > 0);
       if (valid.length === 0) throw new Error("Ajoutez au moins une ligne valide");
 
+      // Autorise plusieurs lignes pour un même produit (lots/DLC distincts),
+      // mais empêche des doublons exacts (même produit + même lot + même DLC).
       const seen = new Set<string>();
       for (const l of valid) {
-        if (seen.has(l.product_id)) {
-          throw new Error("Un produit apparaît plusieurs fois — fusionnez les lignes");
+        const sig = `${l.product_id}|${l.lot_number.trim()}|${l.expiry_date}`;
+        if (seen.has(sig)) {
+          throw new Error("Deux lignes ont le même produit et le même lot/DLC");
         }
-        seen.add(l.product_id);
+        seen.add(sig);
       }
 
       const results: { ok: number; errors: string[] } = { ok: 0, errors: [] };
