@@ -232,6 +232,42 @@ export type Database = {
         }
         Relationships: []
       }
+      company_billing: {
+        Row: {
+          billing_cycle: string
+          company_id: string
+          created_at: string
+          next_billing_at: string | null
+          notes: string | null
+          payment_method: string | null
+          payment_status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          billing_cycle?: string
+          company_id: string
+          created_at?: string
+          next_billing_at?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          billing_cycle?: string
+          company_id?: string
+          created_at?: string
+          next_billing_at?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       company_members: {
         Row: {
           company_id: string
@@ -777,6 +813,96 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_invoices: {
+        Row: {
+          amount_ht: number
+          amount_ttc: number
+          billing_cycle: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_number: string
+          issued_at: string
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status: string
+          vat_amount: number
+          vat_rate: number
+        }
+        Insert: {
+          amount_ht?: number
+          amount_ttc?: number
+          billing_cycle: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_number: string
+          issued_at?: string
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          status?: string
+          vat_amount?: number
+          vat_rate?: number
+        }
+        Update: {
+          amount_ht?: number
+          amount_ttc?: number
+          billing_cycle?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_number?: string
+          issued_at?: string
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          status?: string
+          vat_amount?: number
+          vat_rate?: number
+        }
+        Relationships: []
+      }
+      subscription_plans_catalog: {
+        Row: {
+          description: string | null
+          features: Json
+          is_active: boolean
+          label: string
+          monthly_price: number
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at: string
+          yearly_price: number
+        }
+        Insert: {
+          description?: string | null
+          features?: Json
+          is_active?: boolean
+          label: string
+          monthly_price?: number
+          plan: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string
+          yearly_price?: number
+        }
+        Update: {
+          description?: string | null
+          features?: Json
+          is_active?: boolean
+          label?: string
+          monthly_price?: number
+          plan?: Database["public"]["Enums"]["subscription_plan"]
+          updated_at?: string
+          yearly_price?: number
+        }
+        Relationships: []
+      }
       super_admins: {
         Row: {
           created_at: string
@@ -961,8 +1087,25 @@ export type Database = {
             }
             Returns: string
           }
+      super_admin_create_subscription_invoice: {
+        Args: {
+          _amount_ht: number
+          _billing_cycle: string
+          _company_id: string
+          _period_end: string
+          _period_start: string
+          _plan: Database["public"]["Enums"]["subscription_plan"]
+          _status: string
+          _vat_rate: number
+        }
+        Returns: string
+      }
       super_admin_global_stats: { Args: never; Returns: Json }
       super_admin_grant: { Args: { _user_id: string }; Returns: undefined }
+      super_admin_mark_invoice_paid: {
+        Args: { _invoice_id: string }
+        Returns: undefined
+      }
       super_admin_set_company_active: {
         Args: { _active: boolean; _company_id: string; _reason?: string }
         Returns: undefined
@@ -971,6 +1114,17 @@ export type Database = {
         Args: {
           _company_id: string
           _plan: Database["public"]["Enums"]["subscription_plan"]
+        }
+        Returns: undefined
+      }
+      super_admin_upsert_billing: {
+        Args: {
+          _billing_cycle: string
+          _company_id: string
+          _next_billing_at: string
+          _notes: string
+          _payment_method: string
+          _payment_status: string
         }
         Returns: undefined
       }
