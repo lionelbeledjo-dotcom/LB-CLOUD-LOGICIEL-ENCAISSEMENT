@@ -22,6 +22,7 @@ import { Route as AuthenticatedParametresRouteImport } from './routes/_authentic
 import { Route as AuthenticatedEmployesRouteImport } from './routes/_authenticated/employes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
+import { Route as AuthenticatedComptabiliteRouteImport } from './routes/_authenticated/comptabilite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
 import { Route as AuthenticatedSuperAdminIndexRouteImport } from './routes/_authenticated/super-admin.index'
 import { Route as AuthenticatedSuperAdminMfaRouteImport } from './routes/_authenticated/super-admin.mfa'
@@ -95,6 +96,12 @@ const AuthenticatedConformiteRoute = AuthenticatedConformiteRouteImport.update({
   path: '/conformite',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedComptabiliteRoute =
+  AuthenticatedComptabiliteRouteImport.update({
+    id: '/comptabilite',
+    path: '/comptabilite',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
   id: '/caisse',
   path: '/caisse',
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
+  '/comptabilite': typeof AuthenticatedComptabiliteRoute
   '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employes': typeof AuthenticatedEmployesRoute
@@ -171,6 +179,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
+  '/comptabilite': typeof AuthenticatedComptabiliteRoute
   '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employes': typeof AuthenticatedEmployesRoute
@@ -194,6 +203,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
+  '/_authenticated/comptabilite': typeof AuthenticatedComptabiliteRoute
   '/_authenticated/conformite': typeof AuthenticatedConformiteRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/employes': typeof AuthenticatedEmployesRoute
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/caisse'
+    | '/comptabilite'
     | '/conformite'
     | '/dashboard'
     | '/employes'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/caisse'
+    | '/comptabilite'
     | '/conformite'
     | '/dashboard'
     | '/employes'
@@ -262,6 +274,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/mentions-legales'
     | '/_authenticated/caisse'
+    | '/_authenticated/comptabilite'
     | '/_authenticated/conformite'
     | '/_authenticated/dashboard'
     | '/_authenticated/employes'
@@ -380,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConformiteRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/comptabilite': {
+      id: '/_authenticated/comptabilite'
+      path: '/comptabilite'
+      fullPath: '/comptabilite'
+      preLoaderRoute: typeof AuthenticatedComptabiliteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/caisse': {
       id: '/_authenticated/caisse'
       path: '/caisse'
@@ -480,6 +500,7 @@ const AuthenticatedSuperAdminRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCaisseRoute: typeof AuthenticatedCaisseRoute
+  AuthenticatedComptabiliteRoute: typeof AuthenticatedComptabiliteRoute
   AuthenticatedConformiteRoute: typeof AuthenticatedConformiteRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEmployesRoute: typeof AuthenticatedEmployesRoute
@@ -492,6 +513,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCaisseRoute: AuthenticatedCaisseRoute,
+  AuthenticatedComptabiliteRoute: AuthenticatedComptabiliteRoute,
   AuthenticatedConformiteRoute: AuthenticatedConformiteRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEmployesRoute: AuthenticatedEmployesRoute,
