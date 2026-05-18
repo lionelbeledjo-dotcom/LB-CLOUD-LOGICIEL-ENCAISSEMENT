@@ -34,6 +34,14 @@ const navManage = [
 export function AppSidebar() {
   const { user } = useAuth();
   const location = useLocation();
+  const { data: isSuperAdmin } = useQuery({
+    queryKey: ["is-super-admin", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("super_admins").select("user_id").eq("user_id", user!.id).maybeSingle();
+      return !!data;
+    },
+  });
   const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilisateur";
 
