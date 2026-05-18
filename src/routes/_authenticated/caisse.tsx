@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Minus, Trash2, Search, Receipt, ShoppingCart } from "lucide-react";
+import { Plus, Minus, Trash2, Search, Receipt, ShoppingCart, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveCompany } from "@/hooks/use-company";
@@ -65,6 +65,20 @@ function round2(n: number) {
   return Math.round(n * 100) / 100;
 }
 
+type StockError = { product: string; requested: number; available: number };
+
+// Matches the message raised by the DB function `create_sale`:
+//   Stock insuffisant pour "NAME": demandé X / disponible Y.
+function parseStockError(msg: string): StockError | null {
+  const m = msg.match(/Stock insuffisant pour\s+"([^"]+)":\s*demandé\s+([\d.,]+)\s*\/\s*disponible\s+([\d.,]+)/i);
+  if (!m) return null;
+  return {
+    product: m[1],
+    requested: parseFloat(m[2].replace(",", ".")),
+    available: parseFloat(m[3].replace(",", ".")),
+  };
+}
+
 function CaissePage() {
   const { data: membership, isLoading: loadingCompany } = useActiveCompany();
   const companyId = membership?.company_id;
@@ -75,6 +89,7 @@ function CaissePage() {
   const [paymentMethod, setPaymentMethod] = useState("especes");
   const [amountPaid, setAmountPaid] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [stockError, setStockError] = useState<StockError | null>(null);
   const [lastInvoice, setLastInvoice] = useState<{
     invoice: string;
     totalTtc: number;
@@ -238,7 +253,25 @@ function CaissePage() {
       setConfirmOpen(false);
       toast.success("Vente enregistrée");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => {
+      const parsed = parseStockError(e.message);
+      if (parsed) {
+        setStockError(parsed);
+        // Sync cart with the real available stock so the cashier sees it immediately
+        setCart((prev) =>
+          prev.map((c) =>
+            c.product_name === parsed.product
+              ? { ...c, stock_available: parsed.available }
+              : c,
+          ),
+        );
+        toast.error("Stock insuffisant", {
+          description: `${parsed.product} — demandé ${parsed.requested}, disponible ${parsed.available}`,
+        });
+      } else {
+        toast.error("Échec de la vente", { description: e.message });
+      }
+    },
   });
 
   if (loadingCompany) {
@@ -483,6 +516,56 @@ function CaissePage() {
             >
               Valider la vente
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!stockError} onOpenChange={(o) => !o && setStockError(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="size-5" />
+              Stock insuffisant
+            </DialogTitle>
+            <DialogDescription>
+              La vente a été refusée. Aucune écriture n'a été effectuée et le stock reste inchangé.
+            </DialogDescription>
+          </DialogHeader>
+          {stockError && (
+            <div className="space-y-3 py-2">
+              <div className="bg-background/40 ring-1 ring-border rounded-lg p-4">
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                  Produit en cause
+                </div>
+                <div className="text-base font-semibold text-foreground mt-1">
+                  {stockError.product}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-background/40 ring-1 ring-border rounded-lg p-4">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                    Quantité demandée
+                  </div>
+                  <div className="text-xl font-semibold text-foreground tabular-nums mt-1">
+                    {stockError.requested}
+                  </div>
+                </div>
+                <div className="bg-background/40 ring-1 ring-border rounded-lg p-4">
+                  <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                    Stock disponible
+                  </div>
+                  <div className="text-xl font-semibold text-amber-400 tabular-nums mt-1">
+                    {stockError.available}
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Ajustez la quantité dans le panier ou réapprovisionnez ce produit avant de revalider.
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={() => setStockError(null)}>Compris</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
