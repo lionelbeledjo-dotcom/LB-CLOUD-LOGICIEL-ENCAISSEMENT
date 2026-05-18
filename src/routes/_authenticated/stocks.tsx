@@ -305,6 +305,8 @@ function MovementTab({
   const [supplierId, setSupplierId] = useState<string>("");
   const [newSupplierOpen, setNewSupplierOpen] = useState(false);
   const [newSupplierName, setNewSupplierName] = useState("");
+  const [lotNumber, setLotNumber] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
   const [search, setSearch] = useState("");
 
   const { data: products } = useQuery({
@@ -384,6 +386,8 @@ function MovementTab({
         _target_quantity: null,
         _supplier_id: kind === "entree" && supplierId ? supplierId : null,
         _invoice_number: kind === "entree" && invoiceNumber ? invoiceNumber : null,
+        _lot_number: lotNumber.trim() || null,
+        _expiry_date: expiryDate || null,
       });
       if (error) throw error;
     },
@@ -391,6 +395,7 @@ function MovementTab({
       toast.success(kind === "entree" ? "Entrée enregistrée" : "Sortie enregistrée");
       setQuantity(""); setUnitCost(""); setReason(""); setReference("");
       setInvoiceNumber(""); setSupplierId("");
+      setLotNumber(""); setExpiryDate("");
       qc.invalidateQueries({ queryKey: ["products", companyId, "active-min"] });
       qc.invalidateQueries({ queryKey: ["stock-movements", companyId] });
       qc.invalidateQueries({ queryKey: ["stock-kpis", companyId] });
@@ -497,6 +502,17 @@ function MovementTab({
             </div>
           </>
         )}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label>N° lot</Label>
+            <Input value={lotNumber} onChange={(e) => setLotNumber(e.target.value)}
+              placeholder="LOT-2025-001" />
+          </div>
+          <div>
+            <Label>DLC / expiration</Label>
+            <Input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} />
+          </div>
+        </div>
         <div>
           <Label>Motif / notes</Label>
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} />
