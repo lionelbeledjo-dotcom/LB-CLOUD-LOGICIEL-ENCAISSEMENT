@@ -115,6 +115,57 @@ export type Database = {
         }
         Relationships: []
       }
+      cash_variance_logs: {
+        Row: {
+          abs_variance: number
+          company_id: string
+          counted_amount: number
+          created_at: string
+          expected_amount: number
+          id: string
+          justification: string | null
+          occurred_at: string
+          session_id: string
+          severity: string
+          threshold_major: number
+          threshold_minor: number
+          user_id: string | null
+          variance: number
+        }
+        Insert: {
+          abs_variance: number
+          company_id: string
+          counted_amount: number
+          created_at?: string
+          expected_amount: number
+          id?: string
+          justification?: string | null
+          occurred_at?: string
+          session_id: string
+          severity: string
+          threshold_major?: number
+          threshold_minor?: number
+          user_id?: string | null
+          variance: number
+        }
+        Update: {
+          abs_variance?: number
+          company_id?: string
+          counted_amount?: number
+          created_at?: string
+          expected_amount?: number
+          id?: string
+          justification?: string | null
+          occurred_at?: string
+          session_id?: string
+          severity?: string
+          threshold_major?: number
+          threshold_minor?: number
+          user_id?: string | null
+          variance?: number
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           address_line1: string | null
