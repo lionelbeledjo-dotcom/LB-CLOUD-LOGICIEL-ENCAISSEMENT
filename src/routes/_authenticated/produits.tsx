@@ -280,6 +280,14 @@ function ProductsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-1">
+                          <Link
+                            to="/produits/$productId"
+                            params={{ productId: p.id }}
+                            className="inline-flex items-center justify-center size-9 rounded-md hover:bg-surface text-xs text-muted-foreground hover:text-foreground"
+                            title="Historique des mouvements"
+                          >
+                            <History className="size-4" />
+                          </Link>
                           <Button
                             size="icon"
                             variant="ghost"
