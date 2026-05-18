@@ -301,6 +301,10 @@ function MovementTab({
   const [unitCost, setUnitCost] = useState("");
   const [reason, setReason] = useState("");
   const [reference, setReference] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [supplierId, setSupplierId] = useState<string>("");
+  const [newSupplierOpen, setNewSupplierOpen] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState("");
   const [search, setSearch] = useState("");
 
   const { data: products } = useQuery({
@@ -315,6 +319,43 @@ function MovementTab({
       if (error) throw error;
       return data as Pick<Product, "id" | "name" | "sku" | "unit" | "stock_quantity" | "purchase_price">[];
     },
+  });
+
+  const { data: suppliers } = useQuery({
+    queryKey: ["suppliers", companyId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("suppliers")
+        .select("id, name")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as { id: string; name: string }[];
+    },
+    enabled: kind === "entree",
+  });
+
+  const createSupplier = useMutation({
+    mutationFn: async () => {
+      const name = newSupplierName.trim();
+      if (!name) throw new Error("Nom requis");
+      const { data, error } = await (supabase as any)
+        .from("suppliers")
+        .insert({ company_id: companyId, name })
+        .select("id, name")
+        .single();
+      if (error) throw error;
+      return data as { id: string; name: string };
+    },
+    onSuccess: (sup) => {
+      toast.success("Fournisseur créé");
+      qc.invalidateQueries({ queryKey: ["suppliers", companyId] });
+      setSupplierId(sup.id);
+      setNewSupplierName("");
+      setNewSupplierOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const filtered = useMemo(() => {
@@ -341,12 +382,15 @@ function MovementTab({
         _reason: reason || null,
         _reference: reference || null,
         _target_quantity: null,
+        _supplier_id: kind === "entree" && supplierId ? supplierId : null,
+        _invoice_number: kind === "entree" && invoiceNumber ? invoiceNumber : null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success(kind === "entree" ? "Entrée enregistrée" : "Sortie enregistrée");
       setQuantity(""); setUnitCost(""); setReason(""); setReference("");
+      setInvoiceNumber(""); setSupplierId("");
       qc.invalidateQueries({ queryKey: ["products", companyId, "active-min"] });
       qc.invalidateQueries({ queryKey: ["stock-movements", companyId] });
       qc.invalidateQueries({ queryKey: ["stock-kpis", companyId] });
