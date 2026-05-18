@@ -9,9 +9,12 @@ import {
   Calculator,
   Settings,
   ShieldCheck,
+  Shield,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { LbLogo } from "./LbLogo";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const navMain = [
   { to: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
@@ -31,6 +34,14 @@ const navManage = [
 export function AppSidebar() {
   const { user } = useAuth();
   const location = useLocation();
+  const { data: isSuperAdmin } = useQuery({
+    queryKey: ["is-super-admin", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("super_admins").select("user_id").eq("user_id", user!.id).maybeSingle();
+      return !!data;
+    },
+  });
   const initials = (user?.email ?? "?").slice(0, 2).toUpperCase();
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Utilisateur";
 
@@ -65,6 +76,18 @@ export function AppSidebar() {
             />
           ))}
         </div>
+
+        {isSuperAdmin && (
+          <div className="pt-4">
+            <SectionLabel>Plateforme</SectionLabel>
+            <NavItem
+              to="/super-admin"
+              label="Super Admin"
+              Icon={Shield}
+              active={location.pathname.startsWith("/super-admin")}
+            />
+          </div>
+        )}
       </nav>
 
       <div className="p-4 mt-auto border-t border-border">

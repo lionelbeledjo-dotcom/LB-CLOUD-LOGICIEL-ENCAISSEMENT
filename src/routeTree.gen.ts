@@ -14,11 +14,17 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSuperAdminRouteImport } from './routes/_authenticated/super-admin'
 import { Route as AuthenticatedStocksRouteImport } from './routes/_authenticated/stocks'
 import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticated/produits'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
+import { Route as AuthenticatedSuperAdminIndexRouteImport } from './routes/_authenticated/super-admin.index'
+import { Route as AuthenticatedSuperAdminMfaRouteImport } from './routes/_authenticated/super-admin.mfa'
+import { Route as AuthenticatedSuperAdminLogsRouteImport } from './routes/_authenticated/super-admin.logs'
+import { Route as AuthenticatedSuperAdminEntreprisesRouteImport } from './routes/_authenticated/super-admin.entreprises'
+import { Route as AuthenticatedSuperAdminAbonnementsRouteImport } from './routes/_authenticated/super-admin.abonnements'
 import { Route as AuthenticatedProduitsProductIdRouteImport } from './routes/_authenticated/produits.$productId'
 
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
@@ -45,6 +51,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSuperAdminRoute = AuthenticatedSuperAdminRouteImport.update({
+  id: '/super-admin',
+  path: '/super-admin',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedStocksRoute = AuthenticatedStocksRouteImport.update({
   id: '/stocks',
   path: '/stocks',
@@ -70,6 +81,36 @@ const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
   path: '/caisse',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSuperAdminIndexRoute =
+  AuthenticatedSuperAdminIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedSuperAdminRoute,
+  } as any)
+const AuthenticatedSuperAdminMfaRoute =
+  AuthenticatedSuperAdminMfaRouteImport.update({
+    id: '/mfa',
+    path: '/mfa',
+    getParentRoute: () => AuthenticatedSuperAdminRoute,
+  } as any)
+const AuthenticatedSuperAdminLogsRoute =
+  AuthenticatedSuperAdminLogsRouteImport.update({
+    id: '/logs',
+    path: '/logs',
+    getParentRoute: () => AuthenticatedSuperAdminRoute,
+  } as any)
+const AuthenticatedSuperAdminEntreprisesRoute =
+  AuthenticatedSuperAdminEntreprisesRouteImport.update({
+    id: '/entreprises',
+    path: '/entreprises',
+    getParentRoute: () => AuthenticatedSuperAdminRoute,
+  } as any)
+const AuthenticatedSuperAdminAbonnementsRoute =
+  AuthenticatedSuperAdminAbonnementsRouteImport.update({
+    id: '/abonnements',
+    path: '/abonnements',
+    getParentRoute: () => AuthenticatedSuperAdminRoute,
+  } as any)
 const AuthenticatedProduitsProductIdRoute =
   AuthenticatedProduitsProductIdRouteImport.update({
     id: '/$productId',
@@ -87,7 +128,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
+  '/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
+  '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
+  '/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
+  '/super-admin/logs': typeof AuthenticatedSuperAdminLogsRoute
+  '/super-admin/mfa': typeof AuthenticatedSuperAdminMfaRoute
+  '/super-admin/': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +147,11 @@ export interface FileRoutesByTo {
   '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
   '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
+  '/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
+  '/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
+  '/super-admin/logs': typeof AuthenticatedSuperAdminLogsRoute
+  '/super-admin/mfa': typeof AuthenticatedSuperAdminMfaRoute
+  '/super-admin': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,7 +165,13 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/_authenticated/stocks': typeof AuthenticatedStocksRoute
+  '/_authenticated/super-admin': typeof AuthenticatedSuperAdminRouteWithChildren
   '/_authenticated/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
+  '/_authenticated/super-admin/abonnements': typeof AuthenticatedSuperAdminAbonnementsRoute
+  '/_authenticated/super-admin/entreprises': typeof AuthenticatedSuperAdminEntreprisesRoute
+  '/_authenticated/super-admin/logs': typeof AuthenticatedSuperAdminLogsRoute
+  '/_authenticated/super-admin/mfa': typeof AuthenticatedSuperAdminMfaRoute
+  '/_authenticated/super-admin/': typeof AuthenticatedSuperAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,7 +185,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/produits'
     | '/stocks'
+    | '/super-admin'
     | '/produits/$productId'
+    | '/super-admin/abonnements'
+    | '/super-admin/entreprises'
+    | '/super-admin/logs'
+    | '/super-admin/mfa'
+    | '/super-admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,6 +204,11 @@ export interface FileRouteTypes {
     | '/produits'
     | '/stocks'
     | '/produits/$productId'
+    | '/super-admin/abonnements'
+    | '/super-admin/entreprises'
+    | '/super-admin/logs'
+    | '/super-admin/mfa'
+    | '/super-admin'
   id:
     | '__root__'
     | '/'
@@ -152,7 +221,13 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/produits'
     | '/_authenticated/stocks'
+    | '/_authenticated/super-admin'
     | '/_authenticated/produits/$productId'
+    | '/_authenticated/super-admin/abonnements'
+    | '/_authenticated/super-admin/entreprises'
+    | '/_authenticated/super-admin/logs'
+    | '/_authenticated/super-admin/mfa'
+    | '/_authenticated/super-admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -200,6 +275,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/super-admin': {
+      id: '/_authenticated/super-admin'
+      path: '/super-admin'
+      fullPath: '/super-admin'
+      preLoaderRoute: typeof AuthenticatedSuperAdminRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/stocks': {
       id: '/_authenticated/stocks'
       path: '/stocks'
@@ -235,6 +317,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCaisseRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/super-admin/': {
+      id: '/_authenticated/super-admin/'
+      path: '/'
+      fullPath: '/super-admin/'
+      preLoaderRoute: typeof AuthenticatedSuperAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedSuperAdminRoute
+    }
+    '/_authenticated/super-admin/mfa': {
+      id: '/_authenticated/super-admin/mfa'
+      path: '/mfa'
+      fullPath: '/super-admin/mfa'
+      preLoaderRoute: typeof AuthenticatedSuperAdminMfaRouteImport
+      parentRoute: typeof AuthenticatedSuperAdminRoute
+    }
+    '/_authenticated/super-admin/logs': {
+      id: '/_authenticated/super-admin/logs'
+      path: '/logs'
+      fullPath: '/super-admin/logs'
+      preLoaderRoute: typeof AuthenticatedSuperAdminLogsRouteImport
+      parentRoute: typeof AuthenticatedSuperAdminRoute
+    }
+    '/_authenticated/super-admin/entreprises': {
+      id: '/_authenticated/super-admin/entreprises'
+      path: '/entreprises'
+      fullPath: '/super-admin/entreprises'
+      preLoaderRoute: typeof AuthenticatedSuperAdminEntreprisesRouteImport
+      parentRoute: typeof AuthenticatedSuperAdminRoute
+    }
+    '/_authenticated/super-admin/abonnements': {
+      id: '/_authenticated/super-admin/abonnements'
+      path: '/abonnements'
+      fullPath: '/super-admin/abonnements'
+      preLoaderRoute: typeof AuthenticatedSuperAdminAbonnementsRouteImport
+      parentRoute: typeof AuthenticatedSuperAdminRoute
+    }
     '/_authenticated/produits/$productId': {
       id: '/_authenticated/produits/$productId'
       path: '/$productId'
@@ -258,12 +375,37 @@ const AuthenticatedProduitsRouteWithChildren =
     AuthenticatedProduitsRouteChildren,
   )
 
+interface AuthenticatedSuperAdminRouteChildren {
+  AuthenticatedSuperAdminAbonnementsRoute: typeof AuthenticatedSuperAdminAbonnementsRoute
+  AuthenticatedSuperAdminEntreprisesRoute: typeof AuthenticatedSuperAdminEntreprisesRoute
+  AuthenticatedSuperAdminLogsRoute: typeof AuthenticatedSuperAdminLogsRoute
+  AuthenticatedSuperAdminMfaRoute: typeof AuthenticatedSuperAdminMfaRoute
+  AuthenticatedSuperAdminIndexRoute: typeof AuthenticatedSuperAdminIndexRoute
+}
+
+const AuthenticatedSuperAdminRouteChildren: AuthenticatedSuperAdminRouteChildren =
+  {
+    AuthenticatedSuperAdminAbonnementsRoute:
+      AuthenticatedSuperAdminAbonnementsRoute,
+    AuthenticatedSuperAdminEntreprisesRoute:
+      AuthenticatedSuperAdminEntreprisesRoute,
+    AuthenticatedSuperAdminLogsRoute: AuthenticatedSuperAdminLogsRoute,
+    AuthenticatedSuperAdminMfaRoute: AuthenticatedSuperAdminMfaRoute,
+    AuthenticatedSuperAdminIndexRoute: AuthenticatedSuperAdminIndexRoute,
+  }
+
+const AuthenticatedSuperAdminRouteWithChildren =
+  AuthenticatedSuperAdminRoute._addFileChildren(
+    AuthenticatedSuperAdminRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedCaisseRoute: typeof AuthenticatedCaisseRoute
   AuthenticatedConformiteRoute: typeof AuthenticatedConformiteRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRouteWithChildren
   AuthenticatedStocksRoute: typeof AuthenticatedStocksRoute
+  AuthenticatedSuperAdminRoute: typeof AuthenticatedSuperAdminRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -272,6 +414,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedProduitsRoute: AuthenticatedProduitsRouteWithChildren,
   AuthenticatedStocksRoute: AuthenticatedStocksRoute,
+  AuthenticatedSuperAdminRoute: AuthenticatedSuperAdminRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
