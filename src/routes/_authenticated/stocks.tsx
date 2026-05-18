@@ -301,6 +301,10 @@ function MovementTab({
   const [unitCost, setUnitCost] = useState("");
   const [reason, setReason] = useState("");
   const [reference, setReference] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [supplierId, setSupplierId] = useState<string>("");
+  const [newSupplierOpen, setNewSupplierOpen] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState("");
   const [search, setSearch] = useState("");
 
   const { data: products } = useQuery({
@@ -315,6 +319,43 @@ function MovementTab({
       if (error) throw error;
       return data as Pick<Product, "id" | "name" | "sku" | "unit" | "stock_quantity" | "purchase_price">[];
     },
+  });
+
+  const { data: suppliers } = useQuery({
+    queryKey: ["suppliers", companyId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("suppliers")
+        .select("id, name")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as { id: string; name: string }[];
+    },
+    enabled: kind === "entree",
+  });
+
+  const createSupplier = useMutation({
+    mutationFn: async () => {
+      const name = newSupplierName.trim();
+      if (!name) throw new Error("Nom requis");
+      const { data, error } = await (supabase as any)
+        .from("suppliers")
+        .insert({ company_id: companyId, name })
+        .select("id, name")
+        .single();
+      if (error) throw error;
+      return data as { id: string; name: string };
+    },
+    onSuccess: (sup) => {
+      toast.success("Fournisseur créé");
+      qc.invalidateQueries({ queryKey: ["suppliers", companyId] });
+      setSupplierId(sup.id);
+      setNewSupplierName("");
+      setNewSupplierOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
   });
 
   const filtered = useMemo(() => {
@@ -341,12 +382,15 @@ function MovementTab({
         _reason: reason || null,
         _reference: reference || null,
         _target_quantity: null,
+        _supplier_id: kind === "entree" && supplierId ? supplierId : null,
+        _invoice_number: kind === "entree" && invoiceNumber ? invoiceNumber : null,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success(kind === "entree" ? "Entrée enregistrée" : "Sortie enregistrée");
       setQuantity(""); setUnitCost(""); setReason(""); setReference("");
+      setInvoiceNumber(""); setSupplierId("");
       qc.invalidateQueries({ queryKey: ["products", companyId, "active-min"] });
       qc.invalidateQueries({ queryKey: ["stock-movements", companyId] });
       qc.invalidateQueries({ queryKey: ["stock-kpis", companyId] });
@@ -421,10 +465,38 @@ function MovementTab({
           </p>
         </div>
         <div>
-          <Label>Référence</Label>
+          <Label>Référence interne</Label>
           <Input value={reference} onChange={(e) => setReference(e.target.value)}
-            placeholder={kind === "entree" ? "Bon de livraison, facture fournisseur…" : "Bon de sortie…"} />
+            placeholder={kind === "entree" ? "Bon de livraison interne…" : "Bon de sortie…"} />
         </div>
+        {kind === "entree" && (
+          <>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <Label>Fournisseur</Label>
+                <button
+                  type="button"
+                  className="text-[11px] text-brand hover:underline"
+                  onClick={() => setNewSupplierOpen(true)}
+                >+ Nouveau</button>
+              </div>
+              <Select value={supplierId || "none"} onValueChange={(v) => setSupplierId(v === "none" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— Aucun —</SelectItem>
+                  {(suppliers ?? []).map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>N° facture / BL fournisseur</Label>
+              <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)}
+                placeholder="FA-2025-0042" />
+            </div>
+          </>
+        )}
         <div>
           <Label>Motif / notes</Label>
           <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} />
@@ -445,6 +517,31 @@ function MovementTab({
           {mut.isPending ? "Enregistrement…" : (kind === "entree" ? "Enregistrer l'entrée" : "Enregistrer la sortie")}
         </Button>
       </div>
+
+      <Dialog open={newSupplierOpen} onOpenChange={setNewSupplierOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau fournisseur</DialogTitle>
+            <DialogDescription>Créer un fournisseur rattaché à votre entreprise.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Nom du fournisseur</Label>
+            <Input
+              value={newSupplierName}
+              onChange={(e) => setNewSupplierName(e.target.value)}
+              placeholder="Ex : Metro Cash & Carry"
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setNewSupplierOpen(false)}>Annuler</Button>
+            <Button
+              onClick={() => createSupplier.mutate()}
+              disabled={!newSupplierName.trim() || createSupplier.isPending}
+            >{createSupplier.isPending ? "Création…" : "Créer"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
