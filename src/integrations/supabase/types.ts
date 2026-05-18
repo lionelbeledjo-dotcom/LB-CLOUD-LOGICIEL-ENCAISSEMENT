@@ -22,6 +22,8 @@ export type Database = {
           id: string
           ip_address: string | null
           metadata: Json
+          new_values: Json | null
+          old_values: Json | null
           target_id: string | null
           target_table: string | null
           user_agent: string | null
@@ -34,6 +36,8 @@ export type Database = {
           id?: string
           ip_address?: string | null
           metadata?: Json
+          new_values?: Json | null
+          old_values?: Json | null
           target_id?: string | null
           target_table?: string | null
           user_agent?: string | null
@@ -46,6 +50,8 @@ export type Database = {
           id?: string
           ip_address?: string | null
           metadata?: Json
+          new_values?: Json | null
+          old_values?: Json | null
           target_id?: string | null
           target_table?: string | null
           user_agent?: string | null
@@ -229,6 +235,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      invoice_archives: {
+        Row: {
+          archived_at: string
+          company_id: string
+          hash: string
+          id: string
+          payload: Json
+          sale_id: string
+        }
+        Insert: {
+          archived_at?: string
+          company_id: string
+          hash: string
+          id?: string
+          payload: Json
+          sale_id: string
+        }
+        Update: {
+          archived_at?: string
+          company_id?: string
+          hash?: string
+          id?: string
+          payload?: Json
+          sale_id?: string
+        }
+        Relationships: []
       }
       invoice_counters: {
         Row: {
@@ -416,6 +449,21 @@ export type Database = {
           },
         ]
       }
+      sale_sequences: {
+        Row: {
+          company_id: string
+          last_number: number
+        }
+        Insert: {
+          company_id: string
+          last_number?: number
+        }
+        Update: {
+          company_id?: string
+          last_number?: number
+        }
+        Relationships: []
+      }
       sales: {
         Row: {
           amount_change: number
@@ -423,11 +471,18 @@ export type Database = {
           cashier_id: string | null
           company_id: string
           created_at: string
+          current_hash: string | null
           customer_id: string | null
           id: string
           invoice_number: string
+          is_credit_note: boolean
+          is_locked: boolean
           notes: string | null
+          original_sale_id: string | null
           payment_method: Database["public"]["Enums"]["payment_method"]
+          previous_hash: string | null
+          sequence_number: number | null
+          signed_at: string | null
           sold_at: string
           status: Database["public"]["Enums"]["sale_status"]
           total_ht: number
@@ -441,11 +496,18 @@ export type Database = {
           cashier_id?: string | null
           company_id: string
           created_at?: string
+          current_hash?: string | null
           customer_id?: string | null
           id?: string
           invoice_number: string
+          is_credit_note?: boolean
+          is_locked?: boolean
           notes?: string | null
+          original_sale_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
+          previous_hash?: string | null
+          sequence_number?: number | null
+          signed_at?: string | null
           sold_at?: string
           status?: Database["public"]["Enums"]["sale_status"]
           total_ht?: number
@@ -459,11 +521,18 @@ export type Database = {
           cashier_id?: string | null
           company_id?: string
           created_at?: string
+          current_hash?: string | null
           customer_id?: string | null
           id?: string
           invoice_number?: string
+          is_credit_note?: boolean
+          is_locked?: boolean
           notes?: string | null
+          original_sale_id?: string | null
           payment_method?: Database["public"]["Enums"]["payment_method"]
+          previous_hash?: string | null
+          sequence_number?: number | null
+          signed_at?: string | null
           sold_at?: string
           status?: Database["public"]["Enums"]["sale_status"]
           total_ht?: number
@@ -486,7 +555,59 @@ export type Database = {
             referencedRelation: "customers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sales_original_sale_id_fkey"
+            columns: ["original_sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      sales_journal: {
+        Row: {
+          company_id: string
+          current_hash: string
+          id: string
+          invoice_number: string
+          previous_hash: string
+          recorded_at: string
+          sale_id: string
+          sequence_number: number
+          sold_at: string
+          total_ht: number
+          total_ttc: number
+          total_vat: number
+        }
+        Insert: {
+          company_id: string
+          current_hash: string
+          id?: string
+          invoice_number: string
+          previous_hash: string
+          recorded_at?: string
+          sale_id: string
+          sequence_number: number
+          sold_at: string
+          total_ht: number
+          total_ttc: number
+          total_vat: number
+        }
+        Update: {
+          company_id?: string
+          current_hash?: string
+          id?: string
+          invoice_number?: string
+          previous_hash?: string
+          recorded_at?: string
+          sale_id?: string
+          sequence_number?: number
+          sold_at?: string
+          total_ht?: number
+          total_ttc?: number
+          total_vat?: number
+        }
+        Relationships: []
       }
       super_admins: {
         Row: {
@@ -503,11 +624,39 @@ export type Database = {
         }
         Relationships: []
       }
+      vat_rates: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          rate: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          rate: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          rate?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      anonymize_customer: { Args: { _customer_id: string }; Returns: undefined }
       create_sale: {
         Args: {
           _amount_paid: number
