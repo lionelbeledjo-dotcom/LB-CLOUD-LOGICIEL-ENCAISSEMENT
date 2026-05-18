@@ -546,6 +546,295 @@ function MovementTab({
   );
 }
 
+// ─────────────────────────────────────────── Entrée multi-lignes
+type EntryLine = {
+  key: string;
+  product_id: string;
+  quantity: string;
+  unit_cost: string;
+};
+
+function MultiEntryTab({ companyId }: { companyId: string }) {
+  const qc = useQueryClient();
+  const [lines, setLines] = useState<EntryLine[]>([
+    { key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "" },
+  ]);
+  const [supplierId, setSupplierId] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [reference, setReference] = useState("");
+  const [reason, setReason] = useState("");
+  const [newSupplierOpen, setNewSupplierOpen] = useState(false);
+  const [newSupplierName, setNewSupplierName] = useState("");
+
+  const { data: products } = useQuery({
+    queryKey: ["products", companyId, "active-min"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, sku, unit, stock_quantity, purchase_price")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as Pick<Product, "id" | "name" | "sku" | "unit" | "stock_quantity" | "purchase_price">[];
+    },
+  });
+
+  const { data: suppliers } = useQuery({
+    queryKey: ["suppliers", companyId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("suppliers")
+        .select("id, name")
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as { id: string; name: string }[];
+    },
+  });
+
+  const createSupplier = useMutation({
+    mutationFn: async () => {
+      const name = newSupplierName.trim();
+      if (!name) throw new Error("Nom requis");
+      const { data, error } = await (supabase as any)
+        .from("suppliers")
+        .insert({ company_id: companyId, name })
+        .select("id, name")
+        .single();
+      if (error) throw error;
+      return data as { id: string; name: string };
+    },
+    onSuccess: (sup) => {
+      toast.success("Fournisseur créé");
+      qc.invalidateQueries({ queryKey: ["suppliers", companyId] });
+      setSupplierId(sup.id);
+      setNewSupplierName("");
+      setNewSupplierOpen(false);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateLine = (key: string, patch: Partial<EntryLine>) =>
+    setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
+  const removeLine = (key: string) =>
+    setLines((prev) => (prev.length > 1 ? prev.filter((l) => l.key !== key) : prev));
+  const addLine = () =>
+    setLines((prev) => [...prev, { key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "" }]);
+
+  const onPickProduct = (key: string, pid: string) => {
+    const p = products?.find((x) => x.id === pid);
+    updateLine(key, { product_id: pid, unit_cost: p ? String(p.purchase_price ?? "") : "" });
+  };
+
+  const totalValue = useMemo(
+    () => lines.reduce((acc, l) => acc + (parseFloat(l.quantity) || 0) * (parseFloat(l.unit_cost) || 0), 0),
+    [lines]
+  );
+  const validLineCount = lines.filter(
+    (l) => l.product_id && parseFloat(l.quantity) > 0
+  ).length;
+
+  const submit = useMutation({
+    mutationFn: async () => {
+      const valid = lines.filter((l) => l.product_id && parseFloat(l.quantity) > 0);
+      if (valid.length === 0) throw new Error("Ajoutez au moins une ligne valide");
+
+      const seen = new Set<string>();
+      for (const l of valid) {
+        if (seen.has(l.product_id)) {
+          throw new Error("Un produit apparaît plusieurs fois — fusionnez les lignes");
+        }
+        seen.add(l.product_id);
+      }
+
+      const results: { ok: number; errors: string[] } = { ok: 0, errors: [] };
+      for (const l of valid) {
+        const qty = parseFloat(l.quantity);
+        const cost = l.unit_cost ? parseFloat(l.unit_cost) : null;
+        const { error } = await (supabase.rpc as any)("record_stock_movement", {
+          _product_id: l.product_id,
+          _movement_type: "entree",
+          _quantity: qty,
+          _unit_cost: cost,
+          _reason: reason || null,
+          _reference: reference || null,
+          _target_quantity: null,
+          _supplier_id: supplierId || null,
+          _invoice_number: invoiceNumber || null,
+        });
+        if (error) {
+          const name = products?.find((p) => p.id === l.product_id)?.name ?? l.product_id;
+          results.errors.push(`${name} : ${error.message}`);
+        } else {
+          results.ok += 1;
+        }
+      }
+      return results;
+    },
+    onSuccess: (res) => {
+      if (res.ok > 0) {
+        toast.success(`${res.ok} ligne(s) enregistrée(s)`);
+        setLines([{ key: crypto.randomUUID(), product_id: "", quantity: "", unit_cost: "" }]);
+        setInvoiceNumber(""); setReference(""); setReason("");
+        qc.invalidateQueries({ queryKey: ["products", companyId, "active-min"] });
+        qc.invalidateQueries({ queryKey: ["stock-movements", companyId] });
+        qc.invalidateQueries({ queryKey: ["stock-kpis", companyId] });
+        qc.invalidateQueries({ queryKey: ["products-overview", companyId] });
+      }
+      for (const err of res.errors) toast.error(err);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="mt-4 space-y-4">
+      <div className="grid md:grid-cols-4 gap-3 rounded-xl ring-1 ring-border bg-surface/60 p-4">
+        <div className="md:col-span-2">
+          <div className="flex items-center justify-between mb-1">
+            <Label>Fournisseur</Label>
+            <button type="button" className="text-[11px] text-brand hover:underline"
+              onClick={() => setNewSupplierOpen(true)}>+ Nouveau</button>
+          </div>
+          <Select value={supplierId || "none"} onValueChange={(v) => setSupplierId(v === "none" ? "" : v)}>
+            <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">— Aucun —</SelectItem>
+              {(suppliers ?? []).map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>N° facture / BL fournisseur</Label>
+          <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)}
+            placeholder="FA-2025-0042" />
+        </div>
+        <div>
+          <Label>Référence interne</Label>
+          <Input value={reference} onChange={(e) => setReference(e.target.value)}
+            placeholder="BL interne…" />
+        </div>
+      </div>
+
+      <div className="rounded-xl ring-1 ring-border bg-surface/60 overflow-hidden">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            <ArrowDownToLine className="size-4 text-emerald-400" />
+            Lignes de l'entrée
+          </h2>
+          <Button size="sm" variant="outline" onClick={addLine}>
+            <Plus className="size-4 mr-1" /> Ajouter une ligne
+          </Button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-surface/80 text-xs text-muted-foreground">
+              <tr>
+                <th className="text-left px-3 py-2 w-[40%]">Produit</th>
+                <th className="text-right px-3 py-2 w-[120px]">Stock actuel</th>
+                <th className="text-right px-3 py-2 w-[120px]">Quantité</th>
+                <th className="text-right px-3 py-2 w-[140px]">Prix unitaire (€)</th>
+                <th className="text-right px-3 py-2 w-[120px]">Valeur</th>
+                <th className="w-10"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {lines.map((l) => {
+                const p = products?.find((x) => x.id === l.product_id);
+                const lineVal = (parseFloat(l.quantity) || 0) * (parseFloat(l.unit_cost) || 0);
+                return (
+                  <tr key={l.key} className="border-t border-border/40 align-top">
+                    <td className="px-3 py-2">
+                      <Select value={l.product_id || ""} onValueChange={(v) => onPickProduct(l.key, v)}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Sélectionner…" /></SelectTrigger>
+                        <SelectContent>
+                          {(products ?? []).map((prod) => (
+                            <SelectItem key={prod.id} value={prod.id}>
+                              {prod.name}{prod.sku ? ` · ${prod.sku}` : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">
+                      {p ? `${num(Number(p.stock_quantity))} ${p.unit}` : "—"}
+                    </td>
+                    <td className="px-3 py-2">
+                      <Input type="number" step="0.001" min="0" className="h-9 text-right"
+                        value={l.quantity}
+                        onChange={(e) => updateLine(l.key, { quantity: e.target.value })} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <Input type="number" step="0.01" min="0" className="h-9 text-right"
+                        value={l.unit_cost}
+                        onChange={(e) => updateLine(l.key, { unit_cost: e.target.value })} />
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">
+                      {lineVal ? eur(lineVal) : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      <Button size="icon" variant="ghost" disabled={lines.length === 1}
+                        onClick={() => removeLine(l.key)}>
+                        <Trash2 className="size-4 text-muted-foreground" />
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="border-t border-border bg-surface/60">
+                <td colSpan={4} className="px-3 py-2 text-right text-sm font-semibold">Total entrée</td>
+                <td className="px-3 py-2 text-right text-sm font-semibold tabular-nums">{eur(totalValue)}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div className="rounded-xl ring-1 ring-border bg-surface/60 p-4 space-y-3">
+        <div>
+          <Label>Motif / notes (appliqué à toutes les lignes)</Label>
+          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} />
+        </div>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            {validLineCount} ligne(s) valide(s) · Audit : fournisseur, n° facture et utilisateur enregistrés par ligne.
+          </p>
+          <Button onClick={() => submit.mutate()} disabled={validLineCount === 0 || submit.isPending}>
+            {submit.isPending ? "Enregistrement…" : `Enregistrer ${validLineCount} ligne(s)`}
+          </Button>
+        </div>
+      </div>
+
+      <Dialog open={newSupplierOpen} onOpenChange={setNewSupplierOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Nouveau fournisseur</DialogTitle>
+            <DialogDescription>Créer un fournisseur rattaché à votre entreprise.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Nom du fournisseur</Label>
+            <Input value={newSupplierName} onChange={(e) => setNewSupplierName(e.target.value)}
+              placeholder="Ex : Metro Cash & Carry" autoFocus />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setNewSupplierOpen(false)}>Annuler</Button>
+            <Button onClick={() => createSupplier.mutate()}
+              disabled={!newSupplierName.trim() || createSupplier.isPending}>
+              {createSupplier.isPending ? "Création…" : "Créer"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────── Inventaire (recomptage)
 function InventoryTab({ companyId }: { companyId: string }) {
   const qc = useQueryClient();
