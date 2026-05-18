@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
-import { Plus, Search, Pencil, Trash2, AlertTriangle, Package } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, AlertTriangle, Package, History as HistoryIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveCompany } from "@/hooks/use-company";
@@ -280,6 +280,14 @@ function ProductsPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="inline-flex gap-1">
+                          <Link
+                            to="/produits/$productId"
+                            params={{ productId: p.id }}
+                            className="inline-flex items-center justify-center size-9 rounded-md hover:bg-surface text-xs text-muted-foreground hover:text-foreground"
+                            title="Historique des mouvements"
+                          >
+                            <HistoryIcon className="size-4" />
+                          </Link>
                           <Button
                             size="icon"
                             variant="ghost"

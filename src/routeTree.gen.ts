@@ -19,6 +19,7 @@ import { Route as AuthenticatedProduitsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedConformiteRouteImport } from './routes/_authenticated/conformite'
 import { Route as AuthenticatedCaisseRouteImport } from './routes/_authenticated/caisse'
+import { Route as AuthenticatedProduitsProductIdRouteImport } from './routes/_authenticated/produits.$productId'
 
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
   id: '/mentions-legales',
@@ -69,6 +70,12 @@ const AuthenticatedCaisseRoute = AuthenticatedCaisseRouteImport.update({
   path: '/caisse',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedProduitsProductIdRoute =
+  AuthenticatedProduitsProductIdRouteImport.update({
+    id: '/$productId',
+    path: '/$productId',
+    getParentRoute: () => AuthenticatedProduitsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -78,8 +85,9 @@ export interface FileRoutesByFullPath {
   '/caisse': typeof AuthenticatedCaisseRoute
   '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/produits': typeof AuthenticatedProduitsRoute
+  '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
+  '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,8 +97,9 @@ export interface FileRoutesByTo {
   '/caisse': typeof AuthenticatedCaisseRoute
   '/conformite': typeof AuthenticatedConformiteRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/produits': typeof AuthenticatedProduitsRoute
+  '/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/stocks': typeof AuthenticatedStocksRoute
+  '/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -102,8 +111,9 @@ export interface FileRoutesById {
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
   '/_authenticated/conformite': typeof AuthenticatedConformiteRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/produits': typeof AuthenticatedProduitsRoute
+  '/_authenticated/produits': typeof AuthenticatedProduitsRouteWithChildren
   '/_authenticated/stocks': typeof AuthenticatedStocksRoute
+  '/_authenticated/produits/$productId': typeof AuthenticatedProduitsProductIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/produits'
     | '/stocks'
+    | '/produits/$productId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/produits'
     | '/stocks'
+    | '/produits/$productId'
   id:
     | '__root__'
     | '/'
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/produits'
     | '/_authenticated/stocks'
+    | '/_authenticated/produits/$productId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -222,14 +235,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCaisseRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/produits/$productId': {
+      id: '/_authenticated/produits/$productId'
+      path: '/$productId'
+      fullPath: '/produits/$productId'
+      preLoaderRoute: typeof AuthenticatedProduitsProductIdRouteImport
+      parentRoute: typeof AuthenticatedProduitsRoute
+    }
   }
 }
+
+interface AuthenticatedProduitsRouteChildren {
+  AuthenticatedProduitsProductIdRoute: typeof AuthenticatedProduitsProductIdRoute
+}
+
+const AuthenticatedProduitsRouteChildren: AuthenticatedProduitsRouteChildren = {
+  AuthenticatedProduitsProductIdRoute: AuthenticatedProduitsProductIdRoute,
+}
+
+const AuthenticatedProduitsRouteWithChildren =
+  AuthenticatedProduitsRoute._addFileChildren(
+    AuthenticatedProduitsRouteChildren,
+  )
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCaisseRoute: typeof AuthenticatedCaisseRoute
   AuthenticatedConformiteRoute: typeof AuthenticatedConformiteRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRoute
+  AuthenticatedProduitsRoute: typeof AuthenticatedProduitsRouteWithChildren
   AuthenticatedStocksRoute: typeof AuthenticatedStocksRoute
 }
 
@@ -237,7 +270,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCaisseRoute: AuthenticatedCaisseRoute,
   AuthenticatedConformiteRoute: AuthenticatedConformiteRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedProduitsRoute: AuthenticatedProduitsRoute,
+  AuthenticatedProduitsRoute: AuthenticatedProduitsRouteWithChildren,
   AuthenticatedStocksRoute: AuthenticatedStocksRoute,
 }
 
