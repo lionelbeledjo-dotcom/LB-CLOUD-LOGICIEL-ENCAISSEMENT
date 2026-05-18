@@ -685,6 +685,10 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      log_rgpd_action: {
+        Args: { _action: string; _customer_id: string }
+        Returns: undefined
+      }
       next_invoice_number: { Args: { _company_id: string }; Returns: string }
     }
     Enums: {
