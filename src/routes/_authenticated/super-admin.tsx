@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Shield, Building2, CreditCard, ScrollText, LayoutDashboard, KeyRound, AlertTriangle } from "lucide-react";
+import { Shield, Building2, CreditCard, ScrollText, LayoutDashboard, KeyRound, AlertTriangle, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
