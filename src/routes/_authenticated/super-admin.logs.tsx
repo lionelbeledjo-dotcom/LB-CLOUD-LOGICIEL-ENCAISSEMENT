@@ -1,13 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ScrollText, Search } from "lucide-react";
+import { ScrollText, Search, Download } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+
+function toCSV(rows: Log[], companyMap: Map<string, string>): string {
+  const headers = ["created_at", "company_id", "company_name", "user_id", "action", "target_table", "target_id", "metadata"];
+  const escape = (v: unknown) => {
+    const s = v === null || v === undefined ? "" : typeof v === "string" ? v : JSON.stringify(v);
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+  const lines = [headers.join(",")];
+  for (const r of rows) {
+    lines.push([
+      r.created_at, r.company_id, companyMap.get(r.company_id) ?? "",
+      r.user_id ?? "", r.action, r.target_table ?? "", r.target_id ?? "", r.metadata ?? {},
+    ].map(escape).join(","));
+  }
+  return lines.join("\n");
+}
 
 export const Route = createFileRoute("/_authenticated/super-admin/logs")({
   component: SuperAdminLogs,
