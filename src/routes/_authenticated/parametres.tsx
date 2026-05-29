@@ -1,7 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Building2, Phone, Receipt, FileText, ShieldCheck, Plus, Trash2 } from "lucide-react";
+import { Building2, Phone, Receipt, FileText, ShieldCheck, Plus, Trash2, CreditCard, ExternalLink, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveCompany } from "@/hooks/use-company";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { createCheckoutSession, createCustomerPortalSession } from "@/lib/stripe.functions";
 
 export const Route = createFileRoute("/_authenticated/parametres")({
   head: () => ({ meta: [{ title: "Paramètres — Lb Cloud" }] }),
@@ -74,6 +75,7 @@ function ParametresPage() {
           <TabsTrigger value="tva"><Receipt className="size-4 mr-2" />TVA</TabsTrigger>
           <TabsTrigger value="coordonnees"><Phone className="size-4 mr-2" />Coordonnées</TabsTrigger>
           <TabsTrigger value="facturation"><FileText className="size-4 mr-2" />Facturation</TabsTrigger>
+          <TabsTrigger value="abonnement"><CreditCard className="size-4 mr-2" />Abonnement</TabsTrigger>
           <TabsTrigger value="securite"><ShieldCheck className="size-4 mr-2" />Sécurité</TabsTrigger>
         </TabsList>
 
@@ -88,6 +90,9 @@ function ParametresPage() {
         </TabsContent>
         <TabsContent value="facturation" className="mt-4">
           <InvoicingSection companyId={companyId} />
+        </TabsContent>
+        <TabsContent value="abonnement" className="mt-4">
+          <SubscriptionSection companyId={companyId} />
         </TabsContent>
         <TabsContent value="securite" className="mt-4">
           <SecuritySection />
@@ -486,6 +491,184 @@ function InvoicingSection({ companyId }: { companyId: string }) {
   );
 }
 
+
+function SubscriptionSection({ companyId }: { companyId: string }) {
+  const { data: company, isLoading } = useCompany(companyId);
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [loadingPortal, setLoadingPortal] = useState(false);
+
+  const { data: plans } = useQuery({
+    queryKey: ["subscription-plans-catalog"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subscription_plans_catalog")
+        .select("*")
+        .order("monthly_price");
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  const { data: invoices } = useQuery({
+    queryKey: ["my-subscription-invoices", companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subscription_invoices")
+        .select("*")
+        .eq("company_id", companyId)
+        .order("issued_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return data as any[];
+    },
+  });
+
+  const handleCheckout = async (priceId: string, cycle: "monthly" | "yearly") => {
+    setLoadingCheckout(true);
+    try {
+      const { url } = await createCheckoutSession({
+        data: { companyId, priceId, billingCycle: cycle },
+      });
+      if (url) window.location.href = url;
+    } catch (e: any) {
+      toast.error(e.message ?? "Erreur lors de la souscription");
+    } finally {
+      setLoadingCheckout(false);
+    }
+  };
+
+  const handlePortal = async () => {
+    setLoadingPortal(true);
+    try {
+      const { url } = await createCustomerPortalSession({
+        data: { companyId },
+      });
+      if (url) window.location.href = url;
+    } catch (e: any) {
+      toast.error(e.message ?? "Erreur");
+    } finally {
+      setLoadingPortal(false);
+    }
+  };
+
+  if (isLoading) return <Skeleton className="h-64 w-full" />;
+
+  const currentPlan = company?.subscription_plan ?? "essai";
+  const hasStripe = !!(company as any)?.stripe_customer_id;
+  const fmtEUR = (n: number) =>
+    new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n ?? 0);
+
+  return (
+    <div className="space-y-4">
+      <Card title="Votre abonnement" description="Gérez votre plan et vos factures Lb Cloud.">
+        <div className="flex items-center justify-between rounded-lg ring-1 ring-border/60 bg-surface/40 p-4">
+          <div>
+            <p className="text-sm font-medium">Plan actuel</p>
+            <p className="text-2xl font-semibold capitalize mt-1">{currentPlan}</p>
+          </div>
+          {hasStripe && (
+            <Button variant="outline" onClick={handlePortal} disabled={loadingPortal}>
+              {loadingPortal ? <Loader2 className="size-4 animate-spin mr-2" /> : <ExternalLink className="size-4 mr-2" />}
+              Gérer mon abonnement
+            </Button>
+          )}
+        </div>
+
+        {currentPlan === "essai" && (
+          <div className="rounded-md bg-amber-500/10 ring-1 ring-amber-500/30 p-3">
+            <p className="text-xs text-amber-700 dark:text-amber-300">
+              Vous êtes en période d'essai. Choisissez un plan ci-dessous pour continuer à utiliser Lb Cloud.
+            </p>
+          </div>
+        )}
+      </Card>
+
+      <Card title="Plans disponibles" description="Choisissez le plan adapté à votre activité.">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {(plans ?? []).filter((p: any) => p.plan !== "essai").map((plan: any) => (
+            <div
+              key={plan.plan}
+              className={`rounded-xl ring-1 p-5 space-y-3 ${
+                plan.plan === currentPlan
+                  ? "ring-primary/60 bg-primary/5"
+                  : "ring-border bg-surface/60"
+              }`}
+            >
+              <div>
+                <h3 className="text-base font-semibold capitalize">{plan.label}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
+              </div>
+              <div>
+                <p className="text-2xl font-semibold">{fmtEUR(Number(plan.monthly_price))}<span className="text-sm text-muted-foreground font-normal"> /mois</span></p>
+                <p className="text-xs text-muted-foreground">ou {fmtEUR(Number(plan.yearly_price))} /an</p>
+              </div>
+              {plan.plan === currentPlan ? (
+                <Button disabled className="w-full">Plan actuel</Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    disabled={loadingCheckout}
+                    onClick={() => handleCheckout(plan.stripe_price_id_monthly ?? plan.plan, "monthly")}
+                  >
+                    Mensuel
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex-1"
+                    disabled={loadingCheckout}
+                    onClick={() => handleCheckout(plan.stripe_price_id_yearly ?? plan.plan, "yearly")}
+                  >
+                    Annuel
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {(invoices ?? []).length > 0 && (
+        <Card title="Historique de facturation">
+          <div className="rounded-md ring-1 ring-border overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="text-[10px] uppercase tracking-wider text-muted-foreground bg-surface/40">
+                <tr>
+                  <th className="text-left px-3 py-2">N°</th>
+                  <th className="text-left px-3 py-2">Période</th>
+                  <th className="text-right px-3 py-2">Montant TTC</th>
+                  <th className="text-left px-3 py-2">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(invoices ?? []).map((inv: any) => (
+                  <tr key={inv.id} className="border-t border-border/60">
+                    <td className="px-3 py-2 font-mono text-xs">{inv.invoice_number}</td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground">
+                      {new Date(inv.period_start).toLocaleDateString("fr-FR")} — {new Date(inv.period_end).toLocaleDateString("fr-FR")}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums">{fmtEUR(Number(inv.amount_ttc))}</td>
+                    <td className="px-3 py-2">
+                      <span className={`text-xs px-2 py-0.5 rounded ring-1 ${
+                        inv.status === "paid" ? "bg-emerald-500/10 text-emerald-700 ring-emerald-500/30" :
+                        inv.status === "overdue" ? "bg-red-500/10 text-red-700 ring-red-500/30" :
+                        "bg-amber-500/10 text-amber-700 ring-amber-500/30"
+                      }`}>
+                        {inv.status === "paid" ? "Payée" : inv.status === "overdue" ? "En retard" : "En attente"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
 
 function SecuritySection() {
   const [enrolling, setEnrolling] = useState(false);

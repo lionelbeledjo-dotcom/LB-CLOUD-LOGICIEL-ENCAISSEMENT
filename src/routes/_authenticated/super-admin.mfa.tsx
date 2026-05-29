@@ -99,6 +99,15 @@ function SuperAdminMfa() {
           Niveau de session : <span className="text-foreground font-mono">{aal.current ?? "—"}</span><br />
           Niveau requis : <span className="text-foreground font-mono">{aal.next ?? "—"}</span>
         </p>
+
+        {aal.current === "aal2" && verified.length > 0 && (
+          <div className="rounded-md bg-emerald-500/10 ring-1 ring-emerald-500/30 p-3">
+            <p className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+              2FA active — session élevée (AAL2)
+            </p>
+          </div>
+        )}
+
         <div className="space-y-2">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Facteurs TOTP</Label>
           {factors.length === 0 && <p className="text-sm text-muted-foreground">Aucun facteur configuré.</p>}
@@ -117,7 +126,7 @@ function SuperAdminMfa() {
 
         {verified.length > 0 && aal.current !== "aal2" && (
           <div className="rounded-md bg-amber-500/10 ring-1 ring-amber-500/30 p-3 space-y-2">
-            <p className="text-xs text-amber-300">
+            <p className="text-xs text-amber-700 dark:text-amber-300">
               Saisissez votre code 6 chiffres pour élever votre session :
             </p>
             <Input value={code} onChange={(e) => setCode(e.target.value)}
@@ -129,20 +138,20 @@ function SuperAdminMfa() {
           </div>
         )}
 
-        {unverified.length === 0 && verified.length === 0 && (
+        {unverified.length === 0 && verified.length === 0 && !enroll && (
           <Button onClick={startEnroll} disabled={busy}>
             <KeyRound className="size-4" /> Activer la 2FA (TOTP)
           </Button>
         )}
       </section>
 
-      {enroll && (
+      {enroll ? (
         <section className="rounded-xl ring-1 ring-border bg-surface/60 p-5 space-y-3">
           <h3 className="text-base font-semibold">Scannez le QR code</h3>
           <p className="text-sm text-muted-foreground">
-            Avec Google Authenticator, 1Password, Authy, etc.
+            Avec Google Authenticator, 1Password, Authy, Microsoft Authenticator, etc.
           </p>
-          <div className="bg-white rounded-md p-3 inline-block">
+          <div className="bg-white rounded-md p-3 inline-block ring-1 ring-border">
             <img src={enroll.qr} alt="QR code TOTP" className="size-48" />
           </div>
           <div>
@@ -160,6 +169,19 @@ function SuperAdminMfa() {
               Activer
             </Button>
           </div>
+        </section>
+      ) : (
+        <section className="rounded-xl ring-1 ring-border bg-surface/60 p-5 space-y-3">
+          <h3 className="text-base font-semibold">Comment ça marche ?</h3>
+          <ol className="text-sm text-muted-foreground space-y-2 list-decimal pl-5">
+            <li>Cliquez sur « Activer la 2FA » pour générer un secret TOTP.</li>
+            <li>Scannez le QR code avec votre application d'authentification.</li>
+            <li>Saisissez le code à 6 chiffres pour confirmer l'activation.</li>
+            <li>
+              À chaque connexion, votre session devra être élevée au
+              niveau <span className="font-mono">AAL2</span> pour accéder au Super Admin.
+            </li>
+          </ol>
         </section>
       )}
     </div>
