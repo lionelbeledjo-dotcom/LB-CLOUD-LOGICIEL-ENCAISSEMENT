@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
@@ -32,6 +33,11 @@ import { Route as AuthenticatedSuperAdminAdminsRouteImport } from './routes/_aut
 import { Route as AuthenticatedSuperAdminAbonnementsRouteImport } from './routes/_authenticated/super-admin.abonnements'
 import { Route as AuthenticatedProduitsProductIdRouteImport } from './routes/_authenticated/produits.$productId'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
   id: '/mentions-legales',
   path: '/mentions-legales',
@@ -152,6 +158,7 @@ const AuthenticatedProduitsProductIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -175,6 +182,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
@@ -198,6 +206,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/confidentialite': typeof ConfidentialiteRoute
   '/login': typeof LoginRoute
@@ -224,6 +233,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/confidentialite'
     | '/login'
     | '/mentions-legales'
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/confidentialite'
     | '/login'
     | '/mentions-legales'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/_authenticated'
     | '/confidentialite'
     | '/login'
@@ -294,6 +306,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   LoginRoute: typeof LoginRoute
@@ -302,6 +315,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mentions-legales': {
       id: '/mentions-legales'
       path: '/mentions-legales'
@@ -530,6 +550,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ConfidentialiteRoute: ConfidentialiteRoute,
   LoginRoute: LoginRoute,
