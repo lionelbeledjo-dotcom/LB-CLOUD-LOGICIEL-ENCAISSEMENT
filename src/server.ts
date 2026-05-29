@@ -66,32 +66,8 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
-async function handleStripeWebhook(request: Request): Promise<Response> {
-  try {
-    const payload = await request.text();
-    const signature = request.headers.get("stripe-signature") ?? "";
-    const { handleStripeWebhook: handler } = await import("./lib/stripe.functions");
-    const result = await handler({ data: { payload, signature } });
-    return new Response(JSON.stringify(result), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    });
-  } catch (error: any) {
-    console.error("Stripe webhook error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: { "content-type": "application/json" },
-    });
-  }
-}
-
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
-    const url = new URL(request.url);
-    if (url.pathname === "/api/stripe/webhook" && request.method === "POST") {
-      return handleStripeWebhook(request);
-    }
-
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
