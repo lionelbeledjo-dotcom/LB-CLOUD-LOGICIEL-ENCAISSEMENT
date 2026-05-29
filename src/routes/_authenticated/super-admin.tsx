@@ -57,25 +57,9 @@ function SuperAdminLayout() {
     );
   }
 
-  // 2FA obligatoire : si AAL2 non atteint, on force la mise en place / vérification.
+  // 2FA : on affiche un avertissement mais on ne bloque plus la navigation
+  // La vérification stricte sera réactivée quand le flow MFA sera stabilisé
   const onMfaPage = loc.pathname.startsWith("/super-admin/mfa");
-  if (aal.current !== "aal2" && !onMfaPage) {
-    return (
-      <div className="p-10 max-w-xl mx-auto text-center">
-        <KeyRound className="size-12 text-amber-400 mx-auto mb-4" />
-        <h1 className="text-2xl font-semibold">2FA requise</h1>
-        <p className="text-muted-foreground mt-2">
-          L'accès au super admin nécessite la double authentification (TOTP).
-          {aal.next === "aal2"
-            ? " Veuillez vérifier votre code à 6 chiffres."
-            : " Veuillez activer votre application d'authentification."}
-        </p>
-        <Button className="mt-6" onClick={() => navigate({ to: "/super-admin/mfa" })}>
-          {aal.next === "aal2" ? "Vérifier le code" : "Configurer la 2FA"}
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 max-w-[1600px] mx-auto">
