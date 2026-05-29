@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
@@ -36,6 +37,11 @@ import { Route as AuthenticatedProduitsProductIdRouteImport } from './routes/_au
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
@@ -160,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/confidentialite': typeof ConfidentialiteRoute
+  '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/caisse': typeof AuthenticatedCaisseRoute
@@ -209,6 +217,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/confidentialite': typeof ConfidentialiteRoute
+  '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/_authenticated/caisse': typeof AuthenticatedCaisseRoute
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/confidentialite'
+    | '/demo'
     | '/login'
     | '/mentions-legales'
     | '/caisse'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/confidentialite'
+    | '/demo'
     | '/login'
     | '/mentions-legales'
     | '/caisse'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/demo'
     | '/_authenticated'
     | '/confidentialite'
     | '/login'
@@ -307,6 +319,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  DemoRoute: typeof DemoRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ConfidentialiteRoute: typeof ConfidentialiteRoute
   LoginRoute: typeof LoginRoute
@@ -320,6 +333,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentions-legales': {
@@ -551,6 +571,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  DemoRoute: DemoRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ConfidentialiteRoute: ConfidentialiteRoute,
   LoginRoute: LoginRoute,
