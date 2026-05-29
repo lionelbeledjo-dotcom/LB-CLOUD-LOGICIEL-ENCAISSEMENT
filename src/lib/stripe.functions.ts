@@ -38,13 +38,13 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     }).parse(d)
   )
   .handler(async ({ data, context }) => {
-    const { supabase, user } = context;
+    const { supabase, userId } = context;
 
     const { data: member } = await supabase
       .from("company_members")
       .select("role")
       .eq("company_id", data.companyId)
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .eq("role", "admin_entreprise")
       .maybeSingle();
 
