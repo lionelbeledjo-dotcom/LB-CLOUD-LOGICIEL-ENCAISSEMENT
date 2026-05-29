@@ -61,11 +61,13 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     let customerId = company.stripe_customer_id;
 
     if (!customerId) {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const email = authUser?.email ?? "";
       const customer = await stripeRequest("/customers", {
         name: company.name,
         "metadata[company_id]": company.id,
-        "metadata[user_id]": user.id,
-        email: user.email ?? "",
+        "metadata[user_id]": userId,
+        email,
       });
       customerId = customer.id;
 
