@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LbLogo } from "@/components/LbLogo";
 import { toast } from "sonner";
-import { Shield, Loader2 } from "lucide-react";
+import { Shield, Loader2, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -21,6 +21,8 @@ function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [mode, setMode] = useState<"login" | "forgot">("login");
+  const [resetSent, setResetSent] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -100,48 +102,133 @@ function AdminLoginPage() {
             Console d'administration globale Lb Cloud. Accès réservé.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Email administrateur</label>
-              <input
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition-colors"
-                placeholder="admin@lbcloud.fr"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mot de passe</label>
-              <input
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
+          {mode === "login" ? (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Email administrateur</label>
+                  <input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition-colors"
+                    placeholder="admin@lbcloud.fr"
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mot de passe</label>
+                    <button
+                      type="button"
+                      onClick={() => setMode("forgot")}
+                      className="text-[10px] text-violet-400 hover:text-violet-300 transition-colors"
+                    >
+                      Mot de passe oublié ?
+                    </button>
+                  </div>
+                  <input
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition-colors"
+                    placeholder="••••••••"
+                  />
+                </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-violet-600 text-white py-2.5 rounded-md text-sm font-semibold hover:bg-violet-700 transition-all active:scale-[0.99] shadow-lg shadow-violet-600/30 disabled:opacity-50"
-            >
-              {loading ? "Vérification..." : "Accéder à l'administration"}
-            </button>
-          </form>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-violet-600 text-white py-2.5 rounded-md text-sm font-semibold hover:bg-violet-700 transition-all active:scale-[0.99] shadow-lg shadow-violet-600/30 disabled:opacity-50"
+                >
+                  {loading ? "Vérification..." : "Accéder à l'administration"}
+                </button>
+              </form>
 
-          <div className="mt-6 pt-4 border-t border-border">
-            <p className="text-[10px] text-muted-foreground text-center">
-              Seuls les comptes avec le rôle Super Admin peuvent se connecter ici.
-              <br />
-              La double authentification (2FA) sera demandée après connexion.
-            </p>
-          </div>
+              <div className="mt-6 pt-4 border-t border-border">
+                <p className="text-[10px] text-muted-foreground text-center">
+                  Seuls les comptes avec le rôle Super Admin peuvent se connecter ici.
+                  <br />
+                  La double authentification (2FA) sera demandée après connexion.
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              {resetSent ? (
+                <div className="text-center py-4">
+                  <div className="size-12 rounded-full bg-emerald-500/10 grid place-items-center mx-auto mb-4">
+                    <Shield className="size-6 text-emerald-500" />
+                  </div>
+                  <h2 className="text-base font-semibold text-foreground">Email envoyé !</h2>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Si un compte admin existe avec cette adresse, vous recevrez un lien de réinitialisation.
+                  </p>
+                  <button
+                    onClick={() => { setMode("login"); setResetSent(false); }}
+                    className="mt-4 inline-flex items-center gap-2 text-xs text-violet-400 hover:text-violet-300"
+                  >
+                    <ArrowLeft className="size-3.5" /> Retour à la connexion
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setLoading(true);
+                    try {
+                      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: `${window.location.origin}/admin`,
+                      });
+                      if (error) throw error;
+                      setResetSent(true);
+                      toast.success("Email de réinitialisation envoyé");
+                    } catch (err: any) {
+                      toast.error(err?.message ?? "Erreur");
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Mot de passe oublié</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Entrez votre email admin, nous vous enverrons un lien de réinitialisation.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Email administrateur</label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition-colors"
+                      placeholder="admin@lbcloud.fr"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-violet-600 text-white py-2.5 rounded-md text-sm font-semibold hover:bg-violet-700 transition-all active:scale-[0.99] shadow-lg shadow-violet-600/30 disabled:opacity-50"
+                  >
+                    {loading ? "Envoi..." : "Envoyer le lien de réinitialisation"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("login")}
+                    className="w-full text-center text-xs text-muted-foreground hover:text-violet-400 transition-colors inline-flex items-center justify-center gap-2"
+                  >
+                    <ArrowLeft className="size-3.5" /> Retour à la connexion
+                  </button>
+                </form>
+              )}
+            </>
+          )}
         </div>
 
         <p className="mt-6 text-center text-[10px] text-muted-foreground uppercase tracking-widest">

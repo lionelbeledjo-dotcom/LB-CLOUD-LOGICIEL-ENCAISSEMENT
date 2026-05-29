@@ -147,7 +147,25 @@ function LoginPage() {
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mot de passe</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mot de passe</label>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!email) { toast.error("Entrez votre email d'abord"); return; }
+                      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: `${window.location.origin}/login`,
+                      });
+                      if (error) toast.error(error.message);
+                      else toast.success("Email de réinitialisation envoyé !");
+                    }}
+                    className="text-[10px] text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                )}
+              </div>
               <input
                 type="password"
                 required
