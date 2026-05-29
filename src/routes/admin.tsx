@@ -21,8 +21,9 @@ function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [mode, setMode] = useState<"login" | "forgot">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [resetSent, setResetSent] = useState(false);
+  const [fullName, setFullName] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -148,13 +149,97 @@ function AdminLoginPage() {
                 </button>
               </form>
 
-              <div className="mt-6 pt-4 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setMode("signup")}
+                className="mt-4 w-full text-center text-xs text-muted-foreground hover:text-violet-400 transition-colors"
+              >
+                Pas encore de compte ? <span className="text-violet-400 font-medium">Créer un compte admin</span>
+              </button>
+
+              <div className="mt-4 pt-4 border-t border-border">
                 <p className="text-[10px] text-muted-foreground text-center">
                   Seuls les comptes avec le rôle Super Admin peuvent se connecter ici.
                   <br />
                   La double authentification (2FA) sera demandée après connexion.
                 </p>
               </div>
+            </>
+          ) : mode === "signup" ? (
+            <>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setLoading(true);
+                  try {
+                    const { error } = await supabase.auth.signUp({
+                      email,
+                      password,
+                      options: {
+                        emailRedirectTo: `${window.location.origin}/admin`,
+                        data: { full_name: fullName },
+                      },
+                    });
+                    if (error) throw error;
+                    toast.success("Compte créé ! Vérifiez votre boîte email pour confirmer.");
+                    setMode("login");
+                  } catch (err: any) {
+                    toast.error(err?.message ?? "Erreur lors de la création");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Nom complet</label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition-colors"
+                    placeholder="Lionel Mbeledjo"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Email administrateur</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition-colors"
+                    placeholder="admin@lbcloud.fr"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mot de passe</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={8}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="mt-1.5 w-full bg-background border border-border rounded-md px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30 focus:outline-none transition-colors"
+                    placeholder="Min. 8 caractères"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-violet-600 text-white py-2.5 rounded-md text-sm font-semibold hover:bg-violet-700 transition-all active:scale-[0.99] shadow-lg shadow-violet-600/30 disabled:opacity-50"
+                >
+                  {loading ? "Création..." : "Créer le compte admin"}
+                </button>
+              </form>
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className="mt-4 w-full text-center text-xs text-muted-foreground hover:text-violet-400 transition-colors inline-flex items-center justify-center gap-2"
+              >
+                <ArrowLeft className="size-3.5" /> Déjà un compte ? Se connecter
+              </button>
             </>
           ) : (
             <>
