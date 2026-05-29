@@ -46,6 +46,7 @@ const navSections: NavSection[] = [
       { to: "/super-admin", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
       { to: "/super-admin/entreprises", label: "Entreprises", icon: Building2 },
       { to: "/super-admin/admins", label: "Utilisateurs", icon: Users },
+      { to: "/super-admin/crm", label: "CRM (Prospects)", icon: Users },
     ],
   },
   {

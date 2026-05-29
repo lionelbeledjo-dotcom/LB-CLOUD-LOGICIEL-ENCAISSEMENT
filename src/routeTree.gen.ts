@@ -31,6 +31,7 @@ import { Route as AuthenticatedSuperAdminMfaRouteImport } from './routes/_authen
 import { Route as AuthenticatedSuperAdminLogsRouteImport } from './routes/_authenticated/super-admin.logs'
 import { Route as AuthenticatedSuperAdminEntreprisesRouteImport } from './routes/_authenticated/super-admin.entreprises'
 import { Route as AuthenticatedSuperAdminAdminsRouteImport } from './routes/_authenticated/super-admin.admins'
+import { Route as AuthenticatedSuperAdminCrmRouteImport } from './routes/_authenticated/super-admin.crm'
 import { Route as AuthenticatedSuperAdminAbonnementsRouteImport } from './routes/_authenticated/super-admin.abonnements'
 import { Route as AuthenticatedProduitsProductIdRouteImport } from './routes/_authenticated/produits.$productId'
 
@@ -147,6 +148,12 @@ const AuthenticatedSuperAdminAdminsRoute =
   AuthenticatedSuperAdminAdminsRouteImport.update({
     id: '/admins',
     path: '/admins',
+    getParentRoute: () => AuthenticatedSuperAdminRoute,
+  } as any)
+const AuthenticatedSuperAdminCrmRoute =
+  AuthenticatedSuperAdminCrmRouteImport.update({
+    id: '/crm',
+    path: '/crm',
     getParentRoute: () => AuthenticatedSuperAdminRoute,
   } as any)
 const AuthenticatedSuperAdminAbonnementsRoute =
@@ -513,6 +520,7 @@ const AuthenticatedProduitsRouteWithChildren =
   )
 
 interface AuthenticatedSuperAdminRouteChildren {
+  AuthenticatedSuperAdminCrmRoute: typeof AuthenticatedSuperAdminCrmRoute
   AuthenticatedSuperAdminAbonnementsRoute: typeof AuthenticatedSuperAdminAbonnementsRoute
   AuthenticatedSuperAdminAdminsRoute: typeof AuthenticatedSuperAdminAdminsRoute
   AuthenticatedSuperAdminEntreprisesRoute: typeof AuthenticatedSuperAdminEntreprisesRoute
@@ -523,6 +531,7 @@ interface AuthenticatedSuperAdminRouteChildren {
 
 const AuthenticatedSuperAdminRouteChildren: AuthenticatedSuperAdminRouteChildren =
   {
+    AuthenticatedSuperAdminCrmRoute: AuthenticatedSuperAdminCrmRoute,
     AuthenticatedSuperAdminAbonnementsRoute:
       AuthenticatedSuperAdminAbonnementsRoute,
     AuthenticatedSuperAdminAdminsRoute: AuthenticatedSuperAdminAdminsRoute,

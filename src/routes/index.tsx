@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowRight, Check, ShieldCheck, Zap, Building2, Users, BarChart3, CreditCard, Star, CheckCircle2, Package, Receipt } from "lucide-react";
 import { LbLogo } from "@/components/LbLogo";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -43,10 +44,24 @@ function LandingPage() {
   const handleDemo = async (e: React.FormEvent) => {
     e.preventDefault();
     setDemoLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setDemoSent(true);
-    setDemoLoading(false);
-    toast.success("Demande envoyée ! Nous vous rappelons sous 24h.");
+    try {
+      const { error } = await (supabase as any).from("demo_requests").insert({
+        name: demoForm.name,
+        email: demoForm.email,
+        phone: demoForm.phone,
+        company: demoForm.company,
+        sector: demoForm.sector,
+        message: demoForm.message || null,
+      });
+      if (error) throw error;
+      setDemoSent(true);
+      toast.success("Demande envoyée ! Nous vous rappelons sous 24h.");
+    } catch (err: any) {
+      toast.error("Erreur lors de l'envoi. Réessayez.");
+      console.error(err);
+    } finally {
+      setDemoLoading(false);
+    }
   };
 
   return (
