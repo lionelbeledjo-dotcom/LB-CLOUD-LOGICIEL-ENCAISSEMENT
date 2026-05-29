@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -98,9 +98,12 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-          <button className="w-full mt-6 py-2 text-xs font-semibold text-foreground ring-1 ring-border rounded-md hover:bg-surface-elevated transition-colors">
+          <Link
+            to="/caisse"
+            className="block w-full mt-6 py-2 text-xs font-semibold text-foreground ring-1 ring-border rounded-md hover:bg-surface-elevated transition-colors text-center"
+          >
             Gérer les sessions
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -108,9 +111,9 @@ export default function DashboardPage() {
       <section className="bg-surface/60 ring-1 ring-border rounded-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-border flex justify-between items-center">
           <h2 className="text-base font-semibold text-foreground">Dernières ventes</h2>
-          <button className="text-xs font-medium text-primary hover:underline underline-offset-4 inline-flex items-center gap-1">
+          <Link to="/ventes" className="text-xs font-medium text-primary hover:underline underline-offset-4 inline-flex items-center gap-1">
             Tout voir <ArrowUpRight className="size-3" />
-          </button>
+          </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">

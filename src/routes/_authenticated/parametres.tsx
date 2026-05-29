@@ -140,7 +140,10 @@ function CompanyInfoSection({ companyId }: { companyId: string }) {
       legal_name: data.legal_name ?? "",
       siret: data.siret ?? "",
       vat_number: data.vat_number ?? "",
-      sector: data.sector ?? "autre",
+      sector: (data as any).sector ?? "autre",
+      vat_regime: (data as any).vat_regime ?? "normal",
+      opening_hours: (data as any).opening_hours ?? "",
+      website: (data as any).website ?? "",
     });
   }, [data]);
 
@@ -153,7 +156,11 @@ function CompanyInfoSection({ companyId }: { companyId: string }) {
           legal_name: form.legal_name || null,
           siret: form.siret || null,
           vat_number: form.vat_number || null,
-        })
+          sector: form.sector || "autre",
+          vat_regime: form.vat_regime || "normal",
+          opening_hours: form.opening_hours || null,
+          website: form.website || null,
+        } as any)
         .eq("id", companyId);
       if (error) throw error;
     },
@@ -167,7 +174,7 @@ function CompanyInfoSection({ companyId }: { companyId: string }) {
   if (isLoading || !form) return <Skeleton className="h-64 w-full" />;
 
   return (
-    <Card title="Informations entreprise" description="Identité légale de votre société.">
+    <Card title="Informations entreprise" description="Identité légale et paramètres généraux de votre société.">
       <div className="grid sm:grid-cols-2 gap-4">
         <Field label="Nom commercial">
           <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -181,8 +188,35 @@ function CompanyInfoSection({ companyId }: { companyId: string }) {
         <Field label="N° TVA intracom.">
           <Input value={form.vat_number} onChange={(e) => setForm({ ...form, vat_number: e.target.value })} />
         </Field>
-        <Field label="Secteur">
-          <Input value={form.sector} disabled />
+        <Field label="Secteur d'activité">
+          <select
+            value={form.sector}
+            onChange={(e) => setForm({ ...form, sector: e.target.value })}
+            className="w-full h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none"
+          >
+            <option value="commerce">Commerce</option>
+            <option value="restauration">Restauration</option>
+            <option value="artisanat">Artisanat</option>
+            <option value="services">Services</option>
+            <option value="autre">Autre</option>
+          </select>
+        </Field>
+        <Field label="Régime TVA">
+          <select
+            value={form.vat_regime}
+            onChange={(e) => setForm({ ...form, vat_regime: e.target.value })}
+            className="w-full h-9 rounded-md border border-border bg-background px-3 text-sm text-foreground focus:border-primary focus:ring-2 focus:ring-primary/30 focus:outline-none"
+          >
+            <option value="normal">Régime normal</option>
+            <option value="simplifie">Régime simplifié</option>
+            <option value="franchise">Franchise en base de TVA</option>
+          </select>
+        </Field>
+        <Field label="Horaires d'ouverture">
+          <Input value={form.opening_hours} onChange={(e) => setForm({ ...form, opening_hours: e.target.value })} placeholder="Lun-Ven 8h-19h, Sam 9h-12h" />
+        </Field>
+        <Field label="Site web">
+          <Input type="url" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://www.moncommerce.fr" />
         </Field>
       </div>
       <div className="flex justify-end">
