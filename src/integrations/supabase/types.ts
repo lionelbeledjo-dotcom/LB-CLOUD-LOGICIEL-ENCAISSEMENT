@@ -184,6 +184,8 @@ export type Database = {
           postal_code: string | null
           sector: Database["public"]["Enums"]["business_sector"]
           siret: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           subscription_plan: Database["public"]["Enums"]["subscription_plan"]
           updated_at: string
           vat_number: string | null
@@ -205,6 +207,8 @@ export type Database = {
           postal_code?: string | null
           sector?: Database["public"]["Enums"]["business_sector"]
           siret?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
           updated_at?: string
           vat_number?: string | null
@@ -226,6 +230,8 @@ export type Database = {
           postal_code?: string | null
           sector?: Database["public"]["Enums"]["business_sector"]
           siret?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
           updated_at?: string
           vat_number?: string | null
@@ -878,6 +884,8 @@ export type Database = {
           label: string
           monthly_price: number
           plan: Database["public"]["Enums"]["subscription_plan"]
+          stripe_price_id_monthly: string | null
+          stripe_price_id_yearly: string | null
           updated_at: string
           yearly_price: number
         }
@@ -888,6 +896,8 @@ export type Database = {
           label: string
           monthly_price?: number
           plan: Database["public"]["Enums"]["subscription_plan"]
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
           updated_at?: string
           yearly_price?: number
         }
@@ -898,6 +908,8 @@ export type Database = {
           label?: string
           monthly_price?: number
           plan?: Database["public"]["Enums"]["subscription_plan"]
+          stripe_price_id_monthly?: string | null
+          stripe_price_id_yearly?: string | null
           updated_at?: string
           yearly_price?: number
         }
