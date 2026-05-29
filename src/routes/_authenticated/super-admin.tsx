@@ -52,15 +52,15 @@ const navSections: NavSection[] = [
     title: "MONÉTISATION",
     items: [
       { to: "/super-admin/abonnements", label: "Abonnements & Plans", icon: CreditCard },
-      { to: "/super-admin/abonnements", label: "Paiements", icon: Wallet, disabled: true },
-      { to: "/super-admin/abonnements", label: "Analytics", icon: BarChart3, disabled: true },
+      { to: "/super-admin/abonnements", label: "Paiements", icon: Wallet },
+      { to: "/super-admin/abonnements", label: "Analytics", icon: BarChart3 },
     ],
   },
   {
     title: "PLATEFORME",
     items: [
       { to: "/super-admin/logs", label: "Sécurité & Logs", icon: ScrollText },
-      { to: "/super-admin/logs", label: "Paramètres", icon: Settings, disabled: true },
+      { to: "/super-admin/logs", label: "Paramètres", icon: Settings },
       { to: "/super-admin/mfa", label: "2FA", icon: KeyRound },
     ],
   },
