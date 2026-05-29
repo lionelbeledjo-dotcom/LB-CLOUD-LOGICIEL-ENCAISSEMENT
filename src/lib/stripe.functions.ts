@@ -8,9 +8,11 @@ const STRIPE_SECRET_KEY = () => {
   return key;
 };
 
-const STRIPE_WEBHOOK_SECRET = () => process.env.STRIPE_WEBHOOK_SECRET ?? "";
+const STRIPE_WEBHOOK_SECRET = () =>
+  process.env.STRIPE_WEBHOOK_SECRET ?? process.env.SECRET_DU_WEBHOOK_STRIPE ?? "";
 
-const SITE_URL = () => process.env.SITE_URL ?? "https://pro-gestion-coeur.lovable.app";
+const SITE_URL = () =>
+  process.env.SITE_URL ?? process.env.URL_DU_SITE ?? "https://pro-gestion-coeur.lovable.app";
 
 async function stripeRequest(path: string, body?: Record<string, string>, method = "POST") {
   const res = await fetch(`https://api.stripe.com/v1${path}`, {
