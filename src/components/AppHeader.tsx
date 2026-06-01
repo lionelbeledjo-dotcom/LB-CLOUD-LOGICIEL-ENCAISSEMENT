@@ -1,9 +1,8 @@
 import { Bell, Plus, Search, LogOut, X } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useCompanyContext } from "@/hooks/use-company";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 const mockNotifications = [
   { id: 1, title: "Stock faible", message: "Pain au Chocolat : seuil min atteint (5 unités)", time: "il y a 12 min", unread: true },
@@ -13,22 +12,10 @@ const mockNotifications = [
 ];
 
 export function AppHeader() {
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
+  const { companies, activeCompany, switchCompany } = useCompanyContext();
   const navigate = useNavigate();
   const [showNotifs, setShowNotifs] = useState(false);
-
-  const { data: companies } = useQuery({
-    queryKey: ["user-companies", user?.id],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("company_members")
-        .select("company_id, companies:company_id(id, name)")
-        .eq("user_id", user!.id)
-        .eq("is_active", true);
-      return (data ?? []).map((m: any) => m.companies).filter(Boolean);
-    },
-  });
 
   const handleLogout = async () => {
     await signOut();
@@ -50,11 +37,13 @@ export function AppHeader() {
             <select
               className="bg-transparent text-sm font-medium text-foreground border-none focus:ring-0 cursor-pointer outline-none"
               aria-label="Sélection de l'entreprise"
+              value={activeCompany?.id ?? ""}
+              onChange={(e) => switchCompany(e.target.value)}
             >
-              {(companies ?? []).length === 0 ? (
+              {companies.length === 0 ? (
                 <option>Aucune entreprise</option>
               ) : (
-                (companies ?? []).map((c: any) => (
+                companies.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))
               )}

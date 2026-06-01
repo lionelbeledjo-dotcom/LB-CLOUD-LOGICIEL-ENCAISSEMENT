@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
+import { CompanyProvider } from "@/hooks/use-company";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
@@ -32,13 +33,15 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayoutShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <AppSidebar />
-      <main className="pl-64">
-        <AppHeader />
-        {children}
-      </main>
-    </div>
+    <CompanyProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <AppSidebar />
+        <main className="pl-64">
+          <AppHeader />
+          {children}
+        </main>
+      </div>
+    </CompanyProvider>
   );
 }
 
