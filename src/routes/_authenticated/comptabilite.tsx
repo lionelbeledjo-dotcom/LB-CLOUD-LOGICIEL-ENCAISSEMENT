@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Calculator, TrendingUp, Receipt, FileText, Download } from "lucide-react";
+import { useState } from "react";
+import { Calculator, TrendingUp, Receipt, FileText, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveCompany } from "@/hooks/use-company";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { toast } from "sonner";
+import { exportFEC } from "@/lib/conformite.functions";
 
 export const Route = createFileRoute("/_authenticated/comptabilite")({
   head: () => ({ meta: [{ title: "Comptabilité — Lb Cloud" }] }),
@@ -32,9 +35,30 @@ const eur = (n: number) =>
 function ComptabilitePage() {
   const { data: company } = useActiveCompany();
   const companyId = company?.company_id;
+  const [exporting, setExporting] = useState(false);
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  async function handleExportFEC() {
+    if (!companyId) return;
+    setExporting(true);
+    try {
+      const result = await exportFEC({ data: { companyId, year: now.getFullYear() } });
+      const blob = new Blob([result as string], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `FEC_${now.getFullYear()}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Fichier FEC exporté avec succès");
+    } catch (e: any) {
+      toast.error(e.message ?? "Erreur lors de l'export FEC");
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ["compta", companyId, monthStart],
@@ -76,8 +100,9 @@ function ComptabilitePage() {
             Synthèse du mois en cours — {now.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}.
           </p>
         </div>
-        <Button variant="outline" disabled>
-          <Download className="size-4" /> Exporter FEC
+        <Button variant="outline" onClick={handleExportFEC} disabled={exporting || !companyId}>
+          {exporting ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+          {exporting ? "Export en cours…" : "Exporter FEC"}
         </Button>
       </div>
 
