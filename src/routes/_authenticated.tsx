@@ -7,9 +7,12 @@ import { CompanyProvider } from "@/hooks/use-company";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      throw redirect({ to: "/login" });
+    // On client side, check session. On server side, skip (OAuth tokens come via hash)
+    if (typeof window !== "undefined") {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        throw redirect({ to: "/login" });
+      }
     }
   },
   component: AuthenticatedLayout,
