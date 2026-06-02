@@ -28,11 +28,15 @@ function LoginPage() {
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && hash.includes("access_token")) {
-      // Supabase client will pick up the hash automatically via onAuthStateChange
-      // Just clear the hash from URL for cleanliness
-      window.history.replaceState(null, "", window.location.pathname);
+      // Let Supabase pick up the hash and establish session
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          window.history.replaceState(null, "", window.location.pathname);
+          navigate({ to: "/dashboard" });
+        }
+      });
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (!authLoading && session) {
