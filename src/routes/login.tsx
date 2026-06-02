@@ -24,6 +24,16 @@ function LoginPage() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Handle OAuth callback — Supabase puts tokens in the URL hash
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes("access_token")) {
+      // Supabase client will pick up the hash automatically via onAuthStateChange
+      // Just clear the hash from URL for cleanliness
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
+
   useEffect(() => {
     if (!authLoading && session) {
       navigate({ to: "/dashboard" });
@@ -64,7 +74,7 @@ function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/login`,
         },
       });
       if (error) {
